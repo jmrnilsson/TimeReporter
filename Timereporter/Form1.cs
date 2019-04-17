@@ -42,5 +42,16 @@ namespace Timereporter
             this.Show();
             this.WindowState = FormWindowState.Normal;
         }
+
+        private void LoadData()
+        {
+            var model = new Model();
+            dataGridView1.DataSource = model.GetData();
+        }
+
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            LoadData();
+        }
     }
 }
