@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace Timereporter
 {
 	public partial class Form1 : Form
 	{
+		private GridActor _gridActor;
+
 		public Form1()
 		{
 			InitializeComponent();
@@ -39,15 +40,8 @@ namespace Timereporter
 
 		private void LoadData()
 		{
-			Color lgray = Color.FromArgb(255, 240, 240, 240);
-			var model = new GridMetadataFactory();
-			var data = model.GetData();
-			dataGridView1.DataSource = data.Workdays;
-
-			foreach (var i in data.WeekendIndices)
-			{
-				dataGridView1.Rows[i].DefaultCellStyle.BackColor = lgray;
-			}
+			GridMutator.Load(dataGridView1);
+			_gridActor = new GridActor(dataGridView1);
 		}
 
 		private void Button1_Click(object sender, EventArgs e)
