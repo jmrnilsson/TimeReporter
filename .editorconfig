@@ -1,0 +1,30 @@
+# OFFICIAL DOCS: https://editorconfig.org/
+# MICROSOFT SOURCE: https://docs.microsoft.com/en-us/visualstudio/ide/create-portable-custom-editor-options?view=vs-2017
+# SCOTTY'S BLOG: https://www.hanselman.com/blog/TabsVsSpacesAPeacefulResolutionWithEditorConfigInVisualStudioPlusNETExtensions.aspx
+
+# Supported things in vs pro 2017
+# - indent_style
+# - indent_size
+# - tab_width
+# - end_of_line
+# - charset
+# - trim_trailing_whitespace
+# - insert_final_newline
+# - root
+
+[*.cs]
+end_of_line = crlf
+indent_style = tab
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.editorconfig]
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cmd, *.bat]
+end_of_line = crlf
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
