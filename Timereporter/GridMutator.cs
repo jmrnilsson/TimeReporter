@@ -1,5 +1,7 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
+using Timereporter.Models;
 
 namespace Timereporter
 {
@@ -8,7 +10,7 @@ namespace Timereporter
 		public static void Load(DataGridView dgv)
 		{
 			Color lgray = Color.FromArgb(255, 240, 240, 240);
-			var model = new GridMetadataFactory();
+			var model = new GridDataFactory();
 			var data = model.GetData();
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
@@ -17,8 +19,8 @@ namespace Timereporter
 				var wd = data.Workdays[i];
 				dgv.Rows.Add
 				(
-					wd.Date,
-					wd.DayOfWeek
+					wd.DateText,
+					wd.DayOfWeekText
 				);
 				//dgv.Rows[i].Cells[0].Value = wd.Date;
 				//dgv.Rows[i].Cells[1].Value = wd.DayOfWeek;
@@ -30,32 +32,6 @@ namespace Timereporter
 			{
 				dgv.Rows[i].DefaultCellStyle.BackColor = lgray;
 			}
-		}
-	}
-
-	public class GridActor
-	{
-		private readonly DataGridView dgv;
-
-		public GridActor(DataGridView dgv)
-		{
-			this.dgv = dgv;
-			this.dgv.CellValueChanged += Dgv_CellValueChanged;
-
-		}
-
-		public void Decouple()
-		{
-			this.dgv.CellValueChanged -= Dgv_CellValueChanged;
-		}
-
-		private void Dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-		{
-			//int columnIndex, rowIndex;
-			//columnIndex = e.ColumnIndex;
-			//rowIndex = e.RowIndex;
-			DataGridViewCell cell = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex];
-			throw new System.NotImplementedException();
 		}
 	}
 }
