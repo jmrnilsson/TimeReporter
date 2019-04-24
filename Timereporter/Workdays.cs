@@ -7,38 +7,33 @@ using Timereporter.Models;
 namespace Timereporter
 {
 
-	public class Workdays : IEnumerable
+	public class Workdays : IReadOnlyList<Workday>
 	{
 		private readonly Workday[] workdays;
 
+		public int Count => workdays.Length;
+
+		Workday IReadOnlyList<Workday>.this[int index] => workdays[index];
+
+		public Workdays this[int index] => throw new NotImplementedException();
+
 		public Workdays(Workday[] workdays)
 		{
-			this.workdays = workdays;
+			this.workdays = workdays.ToArray();
 		}
 
 		public Workdays(int year, int month)
 		{
-			this.workdays = EnumerateWorkdays();
+			this.workdays = EnumerateWorkdays(year, month);
 		}
 
-		//public GridMetadata GetData()
-		//{
-		//	return new GridMetadata
-		//	{
-		//		Workdays = workdays,
-		//		// WeekendIndices = new HashSet<int>(workdays.GetWeekendIndices()),
-		//	};
-		//}
-
-
-		private Workday[] EnumerateWorkdays()
+		private Workday[] EnumerateWorkdays(int year, int month)
 		{
 			DateTime start, end;
 			{
-				var now = DateTime.Now;
-				var daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
-				start = new DateTime(now.Year, now.Month, 1);
-				end = new DateTime(now.Year, now.Month, daysInMonth);
+				var daysInMonth = DateTime.DaysInMonth(year, month);
+				start = new DateTime(year, month, 1);
+				end = new DateTime(year, month, daysInMonth);
 			}
 
 			IEnumerable<Workday> EnumerateWorkdays_()
@@ -55,10 +50,15 @@ namespace Timereporter
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return (IEnumerator) GetEnumerator();
+			return GetEnumerator();
 		}
 
 		public WorkdayEnum GetEnumerator()
+		{
+			return new WorkdayEnum(workdays);
+		}
+
+		IEnumerator<Workday> IEnumerable<Workday>.GetEnumerator()
 		{
 			return new WorkdayEnum(workdays);
 		}

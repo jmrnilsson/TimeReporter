@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using Timereporter.Models;
 
 namespace Timereporter
 {
-	public class WorkdayEnum : IEnumerator
+	public class WorkdayEnum : IEnumerator, IEnumerator<Workday>
 	{
 		private int _position = -1;
 		private Workday[] _workdays;
@@ -23,6 +24,12 @@ namespace Timereporter
 		public void Reset()
 		{
 			_position = -1;
+		}
+
+		public void Dispose()
+		{
+			_workdays = null;
+			Reset();
 		}
 
 		object IEnumerator.Current
@@ -45,6 +52,14 @@ namespace Timereporter
 				{
 					throw new InvalidOperationException();
 				}
+			}
+		}
+
+		Workday IEnumerator<Workday>.Current
+		{
+			get
+			{
+				return Current;
 			}
 		}
 	}
