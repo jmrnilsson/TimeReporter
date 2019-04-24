@@ -10,11 +10,11 @@ namespace Timereporter
 		public static void Load(DataGridView dgv)
 		{
 			Color lgray = Color.FromArgb(255, 240, 240, 240);
-			var model = new GridDataFactory();
-			var data = model.GetData();
+			var now = DateTime.Now;
+			var workdays = new Workdays(now.Year, now.Month);
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
-			for (int i = 0; i < data.Workdays.Count; i++)
+			for (int i = 0; i < workdays.Count; i++)
 			{
 				var wd = data.Workdays[i];
 				dgv.Rows.Add

@@ -6,26 +6,36 @@ namespace Timereporter
 {
 	public static class WorkdayExtensions
 	{
-		public static IEnumerable<int> GetWeekendIndices(this List<Workday> workdays)
+		public static bool IsWeekend(this Workday workday)
 		{
-			int i = 0;
-			while (i < workdays.Count)
+			return workday.Is(DayOfWeek.Sunday) || workday.Is(DayOfWeek.Saturday);
+		}
+
+		static HashSet<int> GetWeekendIndices(this Workday[] workdays)
+		{
+			IEnumerable<int> GetWeekendIndices_()
 			{
-				if (workdays[i].Is(DayOfWeek.Sunday))
+				int i = 0;
+				while (i < workdays.Length)
 				{
-					yield return i;
+					if (workdays[i].Is(DayOfWeek.Sunday))
+					{
+						yield return i;
+					}
+					else if (workdays[i].Is(DayOfWeek.Saturday))
+					{
+						yield return i;
+					}
+					else if (workdays[i].Is(DayOfWeek.Monday))
+					{
+						i += 5;
+						continue;
+					}
+					i++;
 				}
-				else if (workdays[i].Is(DayOfWeek.Saturday))
-				{
-					yield return i;
-				}
-				else if (workdays[i].Is(DayOfWeek.Monday))
-				{
-					i += 5;
-					continue;
-				}
-				i++;
 			}
+
+			return new HashSet<int>(GetWeekendIndices_());
 		}
 	}
 }
