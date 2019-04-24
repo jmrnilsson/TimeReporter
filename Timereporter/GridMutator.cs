@@ -15,13 +15,12 @@ namespace Timereporter
 
 			Color lgray = Color.FromArgb(255, 240, 240, 240);
 			var now = DateTime.Now;
-			// IReadOnlyList<Workday> workdays = new Workdays(now.Year, now.Month);
-			var workdays = new Workdays(now.Year, now.Month);
+			var workdays = Workdays.Range(now.Year, now.Month);
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
 			for (int i = 0; i < workdays.Count; i++)
 			{
-				Workday wd = workdays.ElementAt(i);
+				Workday wd = workdays[i];
 				dgv.Rows.Add
 				(
 					wd.DateText,

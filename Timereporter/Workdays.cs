@@ -13,18 +13,16 @@ namespace Timereporter
 
 		public int Count => workdays.Length;
 
-		Workday IReadOnlyList<Workday>.this[int index] => workdays[index];
+ 		Workday IReadOnlyList<Workday>.this[int index] => workdays[index];
 
-		public Workdays this[int index] => throw new NotImplementedException();
-
-		public Workdays(Workday[] workdays)
-		{
-			this.workdays = workdays.ToArray();
-		}
-
-		public Workdays(int year, int month)
+		private Workdays(int year, int month)
 		{
 			this.workdays = EnumerateWorkdays(year, month);
+		}
+
+		public static IReadOnlyList<Workday> Range(int year, int month)
+		{
+			return new Workdays(year, month);
 		}
 
 		private Workday[] EnumerateWorkdays(int year, int month)
