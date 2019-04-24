@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Timereporter.Models;
 
-namespace Timereporter
+namespace Timereporter.Collections
 {
 	public class WorkdayEnum : IEnumerator, IEnumerator<Workday>
 	{

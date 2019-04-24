@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Timereporter.Models;
 
-namespace Timereporter
+namespace Timereporter.Models
 {
 	public static class WorkdayExtensions
 	{

@@ -58,9 +58,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\Workday.cs" />
-    <Compile Include="WorkdayEnum.cs" />
-    <Compile Include="WorkdayExtensions.cs" />
-    <Compile Include="Workdays.cs" />
+    <Compile Include="Collections\WorkdayEnum.cs" />
+    <Compile Include="Models\WorkdayExtensions.cs" />
+    <Compile Include="Collections\Workdays.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
