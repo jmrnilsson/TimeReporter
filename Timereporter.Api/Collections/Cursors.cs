@@ -1,5 +1,4 @@
-﻿using Optional;
-using System;
+﻿using System;
 using System.Linq;
 using Timereporter.Api.Models;
 using Cursor = Timereporter.Api.Entities.Cursor;
@@ -21,7 +20,7 @@ namespace Timereporter.Api.Collections
 			}
 		}
 
-		public Option<Cursor> GetBy(string cursorType)
+		public Cursor GetBy(string cursorType)
 		{
 			using (DatabaseContext db = Startup.CreateDb())
 			{
@@ -30,7 +29,7 @@ namespace Timereporter.Api.Collections
 					from e in db.Cursors
 					where e.CursorType == cursorType
 					select new Cursor(e.Changed, e.CursorType, e.Position)
-				).SingleOrDefault().SomeNotNull();
+				).SingleOrDefault();
 			}
 		}
 	}

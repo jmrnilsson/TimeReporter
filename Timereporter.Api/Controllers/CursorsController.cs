@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -9,10 +8,15 @@ using Timereporter.Api.Entities;
 
 namespace Timereporter.Api.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CursorsController : ControllerBase
+	[Route("api/[controller]")]
+	[ApiController]
+	public class CursorsController : ControllerBase
 	{
+		/// <summary>
+		/// Example: curl -k -d "" -X POST https://localhost:44388/api/cursors/spelonki/15562
+		/// </summary>
+		/// <param name="cursorType"></param>
+		/// <param name="position"></param>
 		[HttpPost("{cursorType}/{position:long}")]
 		[HttpPut("{cursorType}/{position:long}")]
 		[HttpPatch("{cursorType}/{position:long}")]
@@ -22,6 +26,11 @@ namespace Timereporter.Api.Controllers
 			cursors.AddOrUpdate(new Cursor(cursorType, position));
 		}
 
+		/// <summary>
+		///  Example: curl -k -X GET https://localhost:44388/api/cursors/spelonki
+		/// </summary>
+		/// <param name="cursorType"></param>
+		/// <returns></returns>
 		[HttpGet("{cursorType}")]
 		public IActionResult Get(string cursorType)
 		{
