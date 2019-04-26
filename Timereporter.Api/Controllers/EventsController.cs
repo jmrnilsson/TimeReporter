@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Timereporter.Api.Collections;
+using Timereporter.Api.Entities;
 
 namespace Timereporter.Api.Controllers
 {
@@ -33,14 +34,15 @@ namespace Timereporter.Api.Controllers
 		}
 
 		/// <summary>
-		/// Moment in UNIX-timestamp
+		/// Moment in UNIX-timestamp. Example:
+		/// curl -k -d "" -X POST https://localhost:44388/api/events/random/1556238242
 		/// </summary>
 		/// <param name="value"></param>
 		[HttpPost("{kind}/{moment:double}")]
-		public void Post(string name, int moment)
+		public void Post(string kind, int moment)
 		{
 			var events = new Events();
-			events.Add(new Event(name, moment));
+			events.Add(new Event(kind, moment));
 		}
 
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Timereporter.Api.Models;
+using Event = Timereporter.Api.Entities.Event;
 
 namespace Timereporter.Api.Collections
 {

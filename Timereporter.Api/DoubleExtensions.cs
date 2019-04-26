@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Timereporter.Api.Collections
+namespace Timereporter.Api
 {
-	public static class Int32Extensions
+	public static class DoubleExtensions
 	{
 		public static DateTime UnixTimeStampToDateTime(this double unixTimeStamp)
 		{
