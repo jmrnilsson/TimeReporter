@@ -14,7 +14,6 @@ namespace Timereporter.Api.Entities
 		}
 
 		public Event(DateTime added, string kind, DateTime moment)
-			 : base(added)
 		{
 			Kind = kind ?? throw new ArgumentException(nameof(kind));
 			Moment = moment;

@@ -26,14 +26,7 @@ namespace Timereporter.Api.Controllers
 		public IActionResult Get(string cursorType)
 		{
 			var cursors = new Cursors();
-			var cursor = cursors.GetBy(cursorType);
-
-			if (cursor == null)
-			{
-				return NotFound(cursorType);
-			}
-
-			return Ok(cursor);
+			return cursors.GetBy(cursorType).Match(some: c => (IActionResult) Ok(c), none: () => NotFound(cursorType));
 		}
 	}
 }
