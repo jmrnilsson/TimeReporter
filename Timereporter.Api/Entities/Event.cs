@@ -1,7 +1,6 @@
 ﻿using System;
 
 namespace Timereporter.Api.Entities
-
 {
 	public class Event
 	{
