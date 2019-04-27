@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Timereporter.Core.Models;
 
-namespace Timereporter.Models
+namespace Timereporter.Core.Models
 {
 
 	public class Workday : IWorkday
@@ -19,7 +20,7 @@ namespace Timereporter.Models
 			this.arrival = arrival;
 			this.@break = @break;
 			this.departure = departure;
-			this.otherDays = new List<Workday>();
+			otherDays = new List<Workday>();
 		}
 
 		public string DayOfWeekText => dateTime.DayOfWeek.ToString();
@@ -40,9 +41,9 @@ namespace Timereporter.Models
 		{
 			switch (columnIndex)
 			{
-				case 2: arrival = Int32.Parse(value); break;
-				case 3: @break = Int32.Parse(value); break;
-				case 4: departure = Int32.Parse(value); break;
+				case 2: arrival = int.Parse(value); break;
+				case 3: @break = int.Parse(value); break;
+				case 4: departure = int.Parse(value); break;
 				default: throw new ArgumentException($"Column index {columnIndex} is not mutable for a workday.");
 			}
 		}

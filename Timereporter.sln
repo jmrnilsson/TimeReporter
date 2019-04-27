@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timereporter", "Timereporter\Timereporter.csproj", "{0EF352D4-8BD5-4977-80BC-B692DF7FA5B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timereporter.Api", "Timereporter.Api\Timereporter.Api.csproj", "{ADA51188-EE84-4FED-B9E1-D1864F3A6D9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timereporter.Api", "Timereporter.Api\Timereporter.Api.csproj", "{ADA51188-EE84-4FED-B9E1-D1864F3A6D9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timereporter.Core", "Timereporter.Core\Timereporter.Core.csproj", "{ACE73B12-110B-4C8C-9503-754EE8BC75C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{ADA51188-EE84-4FED-B9E1-D1864F3A6D9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ADA51188-EE84-4FED-B9E1-D1864F3A6D9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ADA51188-EE84-4FED-B9E1-D1864F3A6D9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACE73B12-110B-4C8C-9503-754EE8BC75C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACE73B12-110B-4C8C-9503-754EE8BC75C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACE73B12-110B-4C8C-9503-754EE8BC75C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACE73B12-110B-4C8C-9503-754EE8BC75C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Timereporter.Models;
+using Timereporter.Core.Models;
 
-namespace Timereporter.Models
+namespace Timereporter.Core.Models
 {
 	public static class WorkdayExtensions
 	{

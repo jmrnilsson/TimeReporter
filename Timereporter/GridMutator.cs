@@ -5,6 +5,8 @@ using System.Linq;
 using System.Windows.Forms;
 using Timereporter.Models;
 using Timereporter.Collections;
+using Timereporter.Core.Models;
+using Timereporter.Core.Collections;
 
 namespace Timereporter
 {
@@ -16,7 +18,7 @@ namespace Timereporter
 
 			Color lgray = Color.FromArgb(255, 240, 240, 240);
 			var now = DateTime.Now;
-			var workdays = Workdays.Range(now.Year, now.Month);
+			var workdays = WorkdayHelper.Range(now.Year, now.Month);
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
 			for (int i = 0; i < workdays.Count; i++)

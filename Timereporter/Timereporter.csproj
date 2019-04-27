@@ -131,13 +131,8 @@
     </Compile>
     <Compile Include="GridActor.cs" />
     <Compile Include="GridMutator.cs" />
-    <Compile Include="Models\IWorkday.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Models\Workday.cs" />
-    <Compile Include="Collections\WorkdayEnum.cs" />
-    <Compile Include="Models\WorkdayExtensions.cs" />
-    <Compile Include="Collections\Workdays.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -163,6 +158,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Timereporter.Core\Timereporter.Core.csproj">
+      <Project>{ace73b12-110b-4c8c-9503-754ee8bc75c4}</Project>
+      <Name>Timereporter.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -1,25 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
-namespace Timereporter
+namespace Timereporter.Core.Tasks.EventLogTracker
 {
-	class Program
+	public partial class EventLogTracker
 	{
-		static void Main(string[] args)
-		{
-			Read();
-			Console.WriteLine("Press enter to close.");
-			Console.ReadLine();
-		}
 
-		private static void Read()
+		private static void FindBy(EventLogQuery query)
 		{
 			int i;
-			string eventLogName = "Application";
+			string eventLogName = query.LogName;
 
 			EventLog eventLog = ObjectFactory.Instance.CreateEventLog();
 			eventLog.Log = eventLogName;
-			EventsTimeSource eventTimeSource = new EventsTimeSource();
+			EventsTimeSource eventTimeSource = new EventsTimeSource(query.Pattern);
 
 			i = 0;
 			foreach (EventLogEntry log in eventLog.Entries)
@@ -31,7 +27,7 @@ namespace Timereporter
 
 			Console.WriteLine("");
 			i = 0;
-			foreach (var item in eventTimeSource.GetMinMax())
+			foreach (EventsTimeSource.MinMax item in eventTimeSource.GetMinMax())
 			{
 				Console.WriteLine(item);
 				i++;

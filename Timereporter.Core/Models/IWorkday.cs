@@ -1,4 +1,4 @@
-﻿namespace Timereporter.Models
+﻿namespace Timereporter.Core.Models
 {
 	public interface IWorkday
 	{

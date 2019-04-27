@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Timereporter.Models;
+using Timereporter.Core.Models;
 
-namespace Timereporter.Collections
+namespace Timereporter.Core.Collections
 {
 	public class WorkdayEnum : IEnumerator, IEnumerator<Workday>
 	{
@@ -18,7 +18,7 @@ namespace Timereporter.Collections
 		public bool MoveNext()
 		{
 			_position++;
-			return (_position < _workdays.Length);
+			return _position < _workdays.Length;
 		}
 
 		public void Reset()

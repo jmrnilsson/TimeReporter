@@ -2,10 +2,31 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Timereporter.Models;
+using Timereporter.Core.Collections;
+using Timereporter.Core.Models;
 
-namespace Timereporter.Collections
+namespace Timereporter.Core.Collections
 {
+
+	public static class WorkdayHelper
+	{
+		public static DateTime GetTwoMondaysAgo()
+		{
+			// Pretty bad way of doing this. 
+			var query =
+				from i in Enumerable.Range(8, 31)
+				let maybeMonday = ObjectFactory.Instance.CreateDateTimeNow().Date.AddDays(-i)
+				where maybeMonday.DayOfWeek == DayOfWeek.Monday
+				select maybeMonday;
+
+			return query.Max();
+		}
+
+		public static IReadOnlyList<Workday> Range(int year, int month)
+		{
+			return new Workdays(year, month);
+		}
+	}
 
 	public class Workdays : IReadOnlyList<Workday>
 	{
@@ -13,18 +34,13 @@ namespace Timereporter.Collections
 
 		public int Count => workdays.Length;
 
- 		Workday IReadOnlyList<Workday>.this[int index] => workdays[index];
+		Workday IReadOnlyList<Workday>.this[int index] => workdays[index];
 
-		private Workdays(int year, int month)
+		public Workdays(int year, int month)
 		{
-			this.workdays = EnumerateWorkdays(year, month);
+			workdays = EnumerateWorkdays(year, month);
 		}
-
-		public static IReadOnlyList<Workday> Range(int year, int month)
-		{
-			return new Workdays(year, month);
-		}
-
+			   
 		private Workday[] EnumerateWorkdays(int year, int month)
 		{
 			DateTime start, end;
