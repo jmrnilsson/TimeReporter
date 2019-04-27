@@ -5,18 +5,21 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Timereporter
+namespace Timereporter.Api.CoreTasks.EventLogReader
 {
-	public partial class EventsTimeSource : ITimeSource
+	public class EventsTimeSource : ITimeSource
 	{
 		const int limit = 22;
+		private readonly string pattern;
 		List<LogEntryBox> events;
 		DateTime limitAgo;
 
-		public EventsTimeSource(string pattern)
+		public EventsTimeSource(string pattern, Func<DateTime> now, int limit = 22)
 		{
 			events = new List<LogEntryBox>();
-			limitAgo = ObjectFactory.Instance.CreateDateTimeNow().Date.AddDays(-limit);
+			limitAgo = now().Date.AddDays(-limit);
+			this.pattern = pattern;
+			// limitAgo = fromDate;
 		}
 
 		public void Add(EventLogEntry @event)
@@ -26,7 +29,7 @@ namespace Timereporter
 			events.Add(@boxedEvent);
 		}
 
-		public IReadOnlyList<MinMax> GetMinMax()
+		public IReadOnlyList<MinMax> GetMinMax(DateTime toDate)
 		{
 			var query =
 			(
@@ -44,7 +47,7 @@ namespace Timereporter
 			).ToList();
 
 			// Max, because seems confused about DLS
-			return query.SkipWhile(e => e.Min < mondayAgo).ToList().AsReadOnly();
+			return query.SkipWhile(e => e.Min < toDate).ToList().AsReadOnly();
 		}
 	}
 }

@@ -1,32 +1,38 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Timereporter
+namespace Timereporter.Api.CoreTasks.EventLogReader
 {
 	public delegate EventLog EventLogFactory();
-	public delegate DateTime DateTimeNowFactory();
 
+	// TODO: Change to TinyIoC
 	public sealed class ObjectFactory
 	{
 		private static readonly Lazy<ObjectFactory> lazy = new Lazy<ObjectFactory>(() => new ObjectFactory());
 		public static ObjectFactory Instance { get { return lazy.Value; } }
 
 		private EventLogFactory createEventLog;
-		private DateTimeNowFactory createDateTimeNow;
+		private Func<IDateTimeValueFactory> createDateTimeNow;
+		private Func<EventLogTracker> createEventLogTracker;
 
 		private ObjectFactory()
 		{
 			createEventLog = () => new EventLog();
-			createDateTimeNow = () => DateTime.Now;
+			createDateTimeNow = () => new DateTimeValueFactory();
+			createEventLogTracker = () => new EventLogTracker(createDateTimeNow());
 		}
 
-		public EventLog CreateEventLog()
+		public EventLog EventLog()
 		{
 			return createEventLog();
 		}
-		public DateTime CreateDateTimeNow()
+		public IDateTimeValueFactory DateTimeValueFactory()
 		{
 			return createDateTimeNow();
+		}
+		public EventLogTracker EventLogTracker()
+		{
+			return createEventLogTracker();
 		}
 	}
 }
