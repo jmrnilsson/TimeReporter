@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Timereporter.Api.Collections;
+using Timereporter.Api.Collections.Queries;
 using Timereporter.Api.Entities;
 
 namespace Timereporter.Api.Controllers
@@ -12,6 +13,13 @@ namespace Timereporter.Api.Controllers
 	[ApiController]
 	public class EventsController : ControllerBase
 	{
+		private readonly IEvents events;
+
+		public EventsController(IEvents events)
+		{
+			this.events = events;
+		}
+
 		// GET api/values
 		//[HttpGet]
 		//public ActionResult<IEnumerable<string>> Get()
@@ -22,15 +30,13 @@ namespace Timereporter.Api.Controllers
 		[HttpGet("{year:int}/{month:int}")]
 		public IEnumerable<Event> Get(int year, int month)
 		{
-			var events = new Events();
-			return events.FindByMoment(year, month);
+			return events.FindBy(new YearMonth(year, month));
 		}
 
 		[HttpGet("{year:int}/{month}/{day:int}")]
 		public IEnumerable<Event> Get(int year, int month, int day)
 		{
-			var events = new Events();
-			return events.FindByMoment(year, month, day);
+			return events.FindBy(new Date(year, month, day));
 		}
 
 		/// <summary>
@@ -41,7 +47,6 @@ namespace Timereporter.Api.Controllers
 		[HttpPost("{kind}/{moment:double}")]
 		public void Post(string kind, int moment)
 		{
-			var events = new Events();
 			events.Add(new Event(kind, moment));
 		}
 

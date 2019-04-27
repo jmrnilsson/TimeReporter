@@ -12,9 +12,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Timereporter.Api.Models;
+using Timereporter.Api.Collections;
 
 namespace Timereporter.Api
 {
+	public delegate DatabaseContext DatabaseContextFactoryDelegate();
 	public class Startup
 	{
 		const string conn = @"Server=localhost\SQLEXPRESS;Database=Timereporter;Trusted_Connection=True;";
@@ -30,21 +32,18 @@ namespace Timereporter.Api
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
 			// var connection = @"Server=(localdb)\mssqllocaldb;Database=EFGetStarted.AspNetCore.NewDb;Trusted_Connection=True;ConnectRetryCount=0";
 			services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(conn));
+			services.AddSingleton<DatabaseContextFactoryDelegate>(DatabaseContextFactory);
+			services.AddScoped<ICursors, Cursors>();
+			services.AddScoped<IEvents, Events>();
 		}
 
-		private static DbContextOptionsBuilder<DatabaseContext> CreateSqlServerOptionsBuilder()
+		private static DatabaseContext DatabaseContextFactory()
 		{
 			var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
 			optionsBuilder.UseSqlServer(conn);
-			return optionsBuilder;
-		}
-
-		public static DatabaseContext CreateDb()
-		{
-			return new DatabaseContext(Startup.CreateSqlServerOptionsBuilder().Options);
+			return new DatabaseContext(optionsBuilder.Options);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

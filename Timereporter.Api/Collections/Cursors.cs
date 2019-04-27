@@ -1,35 +1,53 @@
 ﻿using System;
 using System.Linq;
+using Optional;
 using Timereporter.Api.Models;
 using Cursor = Timereporter.Api.Entities.Cursor;
+using Timereporter.Api.Collections.Interfaces;
 
 namespace Timereporter.Api.Collections
 {
-	public class Cursors
+	public interface ICursors : IRepository<Cursor, string> { }
+
+	public class Cursors : ICursors
 	{
-		public void AddOrUpdate(Cursor cursor)
+		private readonly DatabaseContextFactoryDelegate dataContextFactory;
+
+		public Cursors(DatabaseContextFactoryDelegate dataContextFactory)
 		{
-			using (DatabaseContext db = Startup.CreateDb())
+			this.dataContextFactory = dataContextFactory;
+		}
+
+		public void Save(Cursor cursor)
+		{
+			Models.Cursor Create(DatabaseContext db)
 			{
-				var model = db.Cursors.SingleOrDefault(c => c.CursorType == cursor.CursorType) ?? new Models.Cursor() { Added = cursor.Changed };
+				var c = new Models.Cursor() { Added = cursor.Changed };
+				db.Add(c);
+				return c;
+			}
+
+			using (DatabaseContext db = dataContextFactory())
+			{
+				var option = db.Cursors.SingleOrDefault(c => c.CursorType == cursor.CursorType).SomeNotNull();
+				var model = option.ValueOr(() => Create(db));
 				model.Changed = cursor.Changed;
 				model.CursorType = cursor.CursorType;
 				model.Position = cursor.Position;
-				db.Cursors.Add(model);
 				db.SaveChanges();
 			}
 		}
 
-		public Cursor GetBy(string cursorType)
+		public Option<Cursor> FindByKey(string cursorType)
 		{
-			using (DatabaseContext db = Startup.CreateDb())
+			using (DatabaseContext db = dataContextFactory())
 			{
-				return
-				(
+				var query =
 					from e in db.Cursors
 					where e.CursorType == cursorType
-					select new Cursor(e.Changed, e.CursorType, e.Position)
-				).SingleOrDefault();
+					select new Cursor(e.Changed, e.CursorType, e.Position);
+
+				return query.SingleOrDefault().SomeNotNull();
 			}
 		}
 	}

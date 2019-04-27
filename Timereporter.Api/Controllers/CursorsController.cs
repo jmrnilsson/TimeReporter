@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Timereporter.Api.Collections;
 using Timereporter.Api.Entities;
+using Optional;
 
 namespace Timereporter.Api.Controllers
 {
@@ -12,18 +13,22 @@ namespace Timereporter.Api.Controllers
 	[ApiController]
 	public class CursorsController : ControllerBase
 	{
+		private readonly ICursors cursors;
+
+		public CursorsController(ICursors cursors)
+		{
+			this.cursors = cursors;
+		}
+
 		/// <summary>
 		/// Example: curl -k -d "" -X POST https://localhost:44388/api/cursors/spelonki/15562
 		/// </summary>
 		/// <param name="cursorType"></param>
 		/// <param name="position"></param>
-		[HttpPost("{cursorType}/{position:long}")]
-		[HttpPut("{cursorType}/{position:long}")]
 		[HttpPatch("{cursorType}/{position:long}")]
 		public void AddOrUpdate(string cursorType, long position)
 		{
-			var cursors = new Cursors();
-			cursors.AddOrUpdate(new Cursor(cursorType, position));
+			cursors.Save(new Cursor(cursorType, position));
 		}
 
 		/// <summary>
@@ -34,8 +39,8 @@ namespace Timereporter.Api.Controllers
 		[HttpGet("{cursorType}")]
 		public IActionResult Get(string cursorType)
 		{
-			var cursors = new Cursors();
-			return cursors.GetBy(cursorType).Match(some: c => (IActionResult) Ok(c), none: () => NotFound(cursorType));
+			var option = cursors.FindByKey(cursorType);
+			return option.Match<IActionResult>(some: c => Ok(c), none: () => NotFound(cursorType));
 		}
 	}
 }
