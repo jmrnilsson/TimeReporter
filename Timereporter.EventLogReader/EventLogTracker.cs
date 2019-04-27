@@ -7,7 +7,6 @@ namespace Timereporter.Core.Tasks.EventLogTracker
 {
 	public partial class EventLogTracker
 	{
-
 		private static void FindBy(EventLogQuery query)
 		{
 			int i;

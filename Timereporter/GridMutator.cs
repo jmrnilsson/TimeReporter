@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Timereporter.Models;
-using Timereporter.Collections;
 using Timereporter.Core.Models;
 using Timereporter.Core.Collections;
 

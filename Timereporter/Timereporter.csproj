@@ -161,7 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Timereporter.Core\Timereporter.Core.csproj">
-      <Project>{ace73b12-110b-4c8c-9503-754ee8bc75c4}</Project>
+      <Project>{7b24ab82-ded4-41c8-9b89-d8569d1bb308}</Project>
       <Name>Timereporter.Core</Name>
     </ProjectReference>
   </ItemGroup>
