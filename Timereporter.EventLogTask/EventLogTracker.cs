@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using Timereporter.Core.Collections;
 
-namespace Timereporter.Api.CoreTasks.EventLogReader
+namespace Timereporter.EventLogTask
 {
 	public class EventLogTracker
 	{

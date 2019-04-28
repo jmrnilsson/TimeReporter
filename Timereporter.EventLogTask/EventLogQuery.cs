@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Timereporter.Api.CoreTasks.EventLogReader
+namespace Timereporter.EventLogTask
 {
 	public struct EventLogQuery
 	{

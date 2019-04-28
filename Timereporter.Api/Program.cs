@@ -8,7 +8,6 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Timereporter.Api.CoreTasks.EventLogReader;
 
 namespace Timereporter.Api
 {
@@ -16,23 +15,7 @@ namespace Timereporter.Api
 	{
 		public static void Main(string[] args)
 		{
-			if (args.Contains("time"))
-			{
-				var tracker = ObjectFactory.Instance.EventLogTracker();
-				var dateTimeValueFactory = ObjectFactory.Instance.DateTimeValueFactory();
-				var printableRows = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", dateTimeValueFactory.LocalNow()));
-
-				Console.WriteLine("x");
-
-				foreach(var row in printableRows)
-				{
-					Console.WriteLine(row);
-				}
-			}
-			else
-			{
-				CreateWebHostBuilder(args).Build().Run();
-			}
+			CreateWebHostBuilder(args).Build().Run();
 		}
 
 		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

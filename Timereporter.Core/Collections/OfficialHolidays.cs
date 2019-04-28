@@ -8,32 +8,47 @@ namespace Timereporter.Core.Collections
 {
 	public static class OfficialHolidays
 	{
-		private static readonly Lazy<IReadOnlyList<Date>> lazy = new Lazy<IReadOnlyList<Date>>(() => EnumerateOfficialHolidays());
+		private static readonly Lazy<IReadOnlyList<Date>> lazy = new Lazy<IReadOnlyList<Date>>(() => EnumerateHolidays());
 
-		private static IReadOnlyList<Date> EnumerateOfficialHolidays()
+		private static IReadOnlyList<Date> EnumerateHolidays()
 		{
-			IEnumerable<Date> GetOfficialHolidays_()
+			(int Year, int Month, int Day)[] holidays = new (int Year, int Month, int Day)[]
 			{
-				yield return new Date(2019, 01, 01);
-				yield return new Date(2019, 01, 06);
-				yield return new Date(2019, 04, 19);
-				yield return new Date(2019, 04, 21);
-				yield return new Date(2019, 04, 22);
-				yield return new Date(2019, 05, 01);
-				yield return new Date(2019, 05, 30);
-				yield return new Date(2019, 06, 06);
-				yield return new Date(2019, 06, 09);
-				yield return new Date(2019, 06, 22);
-				yield return new Date(2019, 11, 02);
-				yield return new Date(2019, 12, 25);
-				yield return new Date(2019, 12, 26);
-			}
-			return GetOfficialHolidays_().ToArray();
+				(2019, 01, 01), (2019, 01, 06), (2019, 04, 19), (2019, 04, 21), (2019, 04, 22), (2019, 05, 01),
+				(2019, 05, 30), (2019, 06, 06), (2019, 06, 09), (2019, 06, 22), (2019, 11, 02), (2019, 12, 25),
+				(2019, 12, 26),
+
+				(2020, 01, 01), (2020, 01, 06), (2020, 04, 10), (2020, 04, 12), (2020, 04, 13), (2020, 05, 01),
+				(2020, 05, 21), (2020, 05, 31), (2020, 06, 06), (2020, 06, 20), (2020, 10, 31), (2020, 12, 25),
+				(2020, 12, 26),
+
+				(2021, 01, 01), (2021, 01, 06), (2021, 04, 02), (2021, 04, 04), (2021, 04, 05), (2021, 05, 01),
+				(2021, 05, 13), (2021, 05, 23), (2021, 06, 06), (2021, 06, 26), (2021, 11, 06), (2021, 12, 25),
+				(2021, 12, 26),
+
+				(2022, 01, 01), (2022, 01, 06), (2022, 04, 15), (2022, 04, 17), (2022, 04, 18), (2022, 05, 01),
+				(2022, 05, 26), (2022, 06, 05), (2022, 06, 06), (2022, 06, 25), (2022, 11, 05), (2022, 12, 25),
+				(2022, 12, 26),
+
+				(2023, 01, 01), (2023, 01, 06), (2023, 04, 07), (2023, 04, 09), (2023, 04, 10), (2023, 05, 01),
+				(2023, 05, 18), (2023, 05, 28), (2023, 06, 06), (2023, 06, 24), (2023, 11, 04), (2023, 12, 25),
+				(2023, 12, 26),
+
+				(2024, 01, 01), (2024, 01, 06), (2024, 03, 29), (2024, 03, 31), (2024, 04, 01), (2024, 05, 01),
+				(2024, 05, 09), (2024, 05, 19), (2024, 06, 06), (2024, 06, 22), (2024, 11, 02), (2024, 12, 25),
+				(2024, 12, 26),
+
+				(2025, 01, 01), (2025, 01, 06), (2025, 04, 18), (2025, 04, 20), (2025, 04, 21), (2025, 05, 01),
+				(2025, 05, 29), (2025, 06, 06), (2025, 06, 08), (2025, 06, 21), (2025, 11, 01), (2025, 12, 25),
+				(2025, 12, 26)
+			};
+
+			return holidays.Select(oh => new Date(oh.Year, oh.Month, oh.Day)).ToArray();
 		}
 
 		public static IReadOnlyList<Date> List
 		{
-			get { return lazy.Value; }			
+			get { return lazy.Value; }
 		}
 	}
 }

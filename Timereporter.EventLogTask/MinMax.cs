@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Timereporter
+namespace Timereporter.EventLogTask
 {
 	public class MinMax
 	{
@@ -16,12 +16,17 @@ namespace Timereporter
 
 		public override string ToString()
 		{
-			int padLength = 0;
 			var sb = new StringBuilder();
-			sb.Append(Min.ToString("yyyy-MM-dd").PadLeft(padLength += 30));
-			sb.Append(Min.DayOfWeek.ToString().PadLeft(padLength += 30));
-			sb.Append(Min.ToString("HH:mm").PadLeft(padLength += 30));
-			sb.Append(Max.ToString("HH:mm").PadLeft(padLength += 30));
+			void PadAppend(string text)
+			{
+				sb.Append(text.PadLeft(12));
+			}
+
+			PadAppend(Min.ToString("yyyy-MM-dd"));
+			PadAppend(Min.DayOfWeek.ToString());
+			PadAppend(Min.ToString("HH:mm"));
+			PadAppend(Max.ToString("HH:mm"));
+
 			return sb.ToString();
 		}
 

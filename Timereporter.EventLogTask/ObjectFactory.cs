@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using Timereporter.EventLogTask;
 
-namespace Timereporter.Api.CoreTasks.EventLogReader
+namespace Timereporter.EventLogTask
 {
 	public delegate EventLog EventLogFactory();
 

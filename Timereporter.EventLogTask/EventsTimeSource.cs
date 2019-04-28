@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Timereporter.Api.CoreTasks.EventLogReader
+namespace Timereporter.EventLogTask
 {
 	public class EventsTimeSource : ITimeSource
 	{
