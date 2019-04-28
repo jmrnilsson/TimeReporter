@@ -7,9 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timereporter", "Timereporte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timereporter.Api", "Timereporter.Api\Timereporter.Api.csproj", "{ADA51188-EE84-4FED-B9E1-D1864F3A6D9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timereporter.Core", "Timereporter.Core\Timereporter.Core.csproj", "{7B24AB82-DED4-41C8-9B89-D8569D1BB308}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timereporter.EventLogReader", "Timereporter.EventLogReader\Timereporter.EventLogReader.csproj", "{F681051D-6DEC-421C-B4C7-94F07A7D7687}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timereporter.Core", "Timereporter.Core\Timereporter.Core.csproj", "{7B24AB82-DED4-41C8-9B89-D8569D1BB308}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +27,6 @@ Global
 		{7B24AB82-DED4-41C8-9B89-D8569D1BB308}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B24AB82-DED4-41C8-9B89-D8569D1BB308}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B24AB82-DED4-41C8-9B89-D8569D1BB308}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F681051D-6DEC-421C-B4C7-94F07A7D7687}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F681051D-6DEC-421C-B4C7-94F07A7D7687}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F681051D-6DEC-421C-B4C7-94F07A7D7687}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F681051D-6DEC-421C-B4C7-94F07A7D7687}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

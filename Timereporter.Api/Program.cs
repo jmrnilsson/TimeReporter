@@ -16,7 +16,7 @@ namespace Timereporter.Api
 	{
 		public static void Main(string[] args)
 		{
-			if (args.Contains("logs"))
+			if (args.Contains("time"))
 			{
 				var tracker = ObjectFactory.Instance.EventLogTracker();
 				var dateTimeValueFactory = ObjectFactory.Instance.DateTimeValueFactory();
