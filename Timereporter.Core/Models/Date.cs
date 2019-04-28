@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Timereporter.Core.Collections;
 
 namespace Timereporter.Core.Models
 {
-	public struct Date
+	public struct Date : IEquatable<Date>
 	{
 		private readonly int year;
 		private readonly int month;
@@ -49,7 +51,16 @@ namespace Timereporter.Core.Models
 
 		public bool IsWeekend()
 		{
-			return Is(System.DayOfWeek.Sunday) || Is(System.DayOfWeek.Saturday);
+			return Is(System.DayOfWeek.Sunday)
+				|| Is(System.DayOfWeek.Saturday)
+				|| OfficialHolidays.List.Any(Equals);
+		}
+
+		public bool Equals(Date other)
+		{
+			return other.month == month
+				&& other.year == year
+				&& other.day == day;
 		}
 	}
 }
