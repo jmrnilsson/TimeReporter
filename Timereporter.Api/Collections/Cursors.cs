@@ -2,7 +2,7 @@
 using System.Linq;
 using Optional;
 using Timereporter.Api.Models;
-using Cursor = Timereporter.Api.Entities.Cursor;
+using Cursor = Timereporter.Core.Entities.Cursor;
 using Timereporter.Api.Collections.Interfaces;
 
 namespace Timereporter.Api.Collections

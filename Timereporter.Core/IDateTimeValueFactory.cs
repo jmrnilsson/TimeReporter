@@ -1,13 +1,14 @@
 ﻿using System;
+using Timereporter.Core.Models;
 
-namespace Timereporter
+namespace Timereporter.Core
 {
 	/// <summary>
 	/// This interface is merely a front for mocks and tests aside from localization.
 	/// </summary>
 	public interface IDateTimeValueFactory
 	{
-		DateTime LocalNow();
+		Date LocalToday(int addDays = 0);
 		DateTime UtcNow();
 
 		string DayOfWeekText(); 

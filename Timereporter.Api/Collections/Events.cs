@@ -2,7 +2,7 @@
 using System.Linq;
 using Timereporter.Api.Models;
 using Timereporter.Api.Collections.Queries;
-using Event = Timereporter.Api.Entities.Event;
+using Event = Timereporter.Core.Entities.Event;
 using System.Collections.Generic;
 using Timereporter.Api.Collections.Interfaces;
 

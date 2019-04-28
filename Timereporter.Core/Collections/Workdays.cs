@@ -7,26 +7,6 @@ using Timereporter.Core.Models;
 
 namespace Timereporter.Core.Collections
 {
-	public static class WorkdayHelper
-	{
-		public static DateTime GetTwoMondaysAgo(DateTime fromDate)
-		{
-			// Pretty bad way of doing this. 
-			var query =
-				from i in Enumerable.Range(8, 31)
-				let maybeMonday = fromDate.AddDays(-i)
-				where maybeMonday.DayOfWeek == DayOfWeek.Monday
-				select maybeMonday;
-
-			return query.Max();
-		}
-
-		public static IReadOnlyList<IWorkday> Range(int year, int month)
-		{
-			return new Workdays(year, month);
-		}
-	}
-
 	public class Workdays : IReadOnlyList<IWorkday>
 	{
 		private readonly IWorkday[] workdays;

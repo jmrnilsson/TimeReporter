@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Timereporter.Api
+namespace Timereporter.Core
 {
 	public static class DoubleExtensions
 	{

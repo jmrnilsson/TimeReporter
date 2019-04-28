@@ -3,25 +3,26 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Timereporter.EventLogTask.Proxies;
 
 namespace Timereporter.EventLogTask
 {
 	public class LogEntryBox
 	{
-		private readonly EventLogEntry @event;
+		private readonly IEventLogEntryProxy entry;
 
-		public LogEntryBox(EventLogEntry @event)
+		public LogEntryBox(IEventLogEntryProxy entry)
 		{
-			this.@event = @event;
+			this.entry = entry;
 		}
 
-		public DateTime TimeWritten => @event.TimeWritten;
-		public string Date => @event.TimeWritten.ToString("yyyy-MM-dd");
-		public string Source => @event.Source;
+		public DateTime TimeWritten => entry.TimeWritten;
+		public string Date => entry.TimeWritten.ToString("yyyy-MM-dd");
+		public string Source => entry.Source;
 
 		public bool IsWeekday()
 		{
-			DayOfWeek dayOfWeek = @event.TimeWritten.DayOfWeek;
+			DayOfWeek dayOfWeek = entry.TimeWritten.DayOfWeek;
 
 			if (dayOfWeek == DayOfWeek.Saturday || dayOfWeek == DayOfWeek.Sunday)
 			{

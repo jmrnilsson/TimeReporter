@@ -1,6 +1,8 @@
 ﻿using System;
+using Timereporter.Core;
+using Timereporter.Core.Models;
 
-namespace Timereporter
+namespace Timereporter.Core
 {
 	public class DateTimeValueFactory : IDateTimeValueFactory
 	{
@@ -10,9 +12,9 @@ namespace Timereporter
 			return culture.DateTimeFormat.GetDayName(DateTime.Today.DayOfWeek);
 		}
 
-		DateTime IDateTimeValueFactory.LocalNow()
+		Date IDateTimeValueFactory.LocalToday(int addDays = 0)
 		{
-			return DateTime.Now;
+			return new Date(DateTime.Now.AddDays(addDays));
 		}
 
 		DateTime IDateTimeValueFactory.UtcNow()

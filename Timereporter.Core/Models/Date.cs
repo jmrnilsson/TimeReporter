@@ -6,7 +6,7 @@ using Timereporter.Core.Collections;
 
 namespace Timereporter.Core.Models
 {
-	public struct Date : IEquatable<Date>
+	public struct Date : IEquatable<Date>, IComparable<Date>
 	{
 		private readonly int year;
 		private readonly int month;
@@ -61,6 +61,21 @@ namespace Timereporter.Core.Models
 			return other.month == month
 				&& other.year == year
 				&& other.day == day;
+		}
+
+		public DateTime ToDateTime()
+		{
+			return new DateTime(year, month, day);
+		}
+
+		public Date With(int addDays = 0)
+		{
+			return new Date(date.AddDays(addDays));
+		}
+
+		public int CompareTo(Date other)
+		{
+			return other.ToDateTime().CompareTo(ToDateTime());
 		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Timereporter.Api.Entities
+namespace Timereporter.Core.Entities
 
 {
 	public class Cursor

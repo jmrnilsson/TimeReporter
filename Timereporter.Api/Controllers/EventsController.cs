@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Timereporter.Api.Collections;
 using Timereporter.Api.Collections.Queries;
-using Timereporter.Api.Entities;
+using Timereporter.Core.Entities;
 
 namespace Timereporter.Api.Controllers
 {

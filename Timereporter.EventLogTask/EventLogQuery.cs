@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Timereporter.Core.Models;
 
 namespace Timereporter.EventLogTask
 {
 	public struct EventLogQuery
 	{
-		public EventLogQuery(string pattern, string logName, DateTime start)
+		public EventLogQuery(string pattern, string logName, Date fromDate)
 		{
 			Pattern = pattern;
 			LogName = logName;
-			Start = start;
+			FromDate = fromDate;
 		}
 
 		public string Pattern { get; }
 		public string LogName { get; }
-		public DateTime Start { get; }
+		public Date FromDate { get; }
 	}
 }

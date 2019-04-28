@@ -1,5 +1,5 @@
 ﻿using System;
-
+	
 namespace Timereporter.EventLogTask
 {
 	class Program
@@ -8,7 +8,7 @@ namespace Timereporter.EventLogTask
 		{
 			var tracker = ObjectFactory.Instance.EventLogTracker();
 			var dateTimeValueFactory = ObjectFactory.Instance.DateTimeValueFactory();
-			var printableRows = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", dateTimeValueFactory.LocalNow()));
+			var printableRows = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", dateTimeValueFactory.LocalToday()));
 
 			Console.WriteLine("done!");
 
