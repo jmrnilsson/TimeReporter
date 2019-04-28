@@ -15,4 +15,4 @@ Timereporter.Api has a Console that is used for spelunking through the eventlog.
 | Launch | IIS Express  | Project | 
 | Application arguments | (empty)  | time | 
 
-[see image](debug.gif)
+[see image](debug.GIF)
