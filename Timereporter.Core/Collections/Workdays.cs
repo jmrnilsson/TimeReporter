@@ -21,26 +21,26 @@ namespace Timereporter.Core.Collections
 			return query.Max();
 		}
 
-		public static IReadOnlyList<Workday> Range(int year, int month)
+		public static IReadOnlyList<IWorkday> Range(int year, int month)
 		{
 			return new Workdays(year, month);
 		}
 	}
 
-	public class Workdays : IReadOnlyList<Workday>
+	public class Workdays : IReadOnlyList<IWorkday>
 	{
-		private readonly Workday[] workdays;
+		private readonly IWorkday[] workdays;
 
 		public int Count => workdays.Length;
 
-		Workday IReadOnlyList<Workday>.this[int index] => workdays[index];
+		IWorkday IReadOnlyList<IWorkday>.this[int index] => workdays[index];
 
 		public Workdays(int year, int month)
 		{
 			workdays = EnumerateWorkdays(year, month);
 		}
 			   
-		private Workday[] EnumerateWorkdays(int year, int month)
+		private IWorkday[] EnumerateWorkdays(int year, int month)
 		{
 			DateTime start, end;
 			{
@@ -54,7 +54,7 @@ namespace Timereporter.Core.Collections
 				for (int i = 0; start.AddDays(i) < end.AddDays(1); i++)
 				{
 					var date = start.AddDays(i);
-					yield return new Workday(date, 0, 0, 0);
+					yield return new Workday(new Date(date), 0, 0, 0);
 				}
 			}
 
@@ -71,7 +71,7 @@ namespace Timereporter.Core.Collections
 			return new WorkdayEnum(workdays);
 		}
 
-		IEnumerator<Workday> IEnumerable<Workday>.GetEnumerator()
+		IEnumerator<IWorkday> IEnumerable<IWorkday>.GetEnumerator()
 		{
 			return new WorkdayEnum(workdays);
 		}

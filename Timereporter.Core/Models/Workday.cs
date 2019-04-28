@@ -8,24 +8,32 @@ namespace Timereporter.Core.Models
 
 	public class Workday : IWorkday
 	{
-		private readonly DateTime dateTime;
+		private readonly Date date;
 		private int arrival;
 		private int @break;
 		private int departure;
 		private IList<Workday> otherDays;
 
-		public Workday(DateTime dateTime, int arrival, int @break, int departure)
+		public Workday(Date date, int arrival, int @break, int departure)
 		{
-			this.dateTime = dateTime;
+			this.date = date;
+			this.arrival = arrival;
+			this.@break = @break;
+			this.departure = departure;
+			otherDays = new List<Workday>();
+		}
+		public Workday(DateTime date, int arrival, int @break, int departure)
+		{
+			this.date = new Date(date);
 			this.arrival = arrival;
 			this.@break = @break;
 			this.departure = departure;
 			otherDays = new List<Workday>();
 		}
 
-		public string DayOfWeekText => dateTime.DayOfWeek.ToString();
+		public string DayOfWeekText => date.DayOfWeek();
 
-		public string DateText => dateTime.ToString("yyyy-MM-dd");
+		public string DateText => date.ToString();
 
 		public string ArrivalText => arrival.ToString();
 
@@ -50,7 +58,11 @@ namespace Timereporter.Core.Models
 
 		public bool Is(DayOfWeek dayOfWeek)
 		{
-			return dateTime.DayOfWeek == dayOfWeek;
+			return date.Is(dayOfWeek);
+		}
+		public bool IsWeekend()
+		{
+			return date.IsWeekend();
 		}
 
 	}

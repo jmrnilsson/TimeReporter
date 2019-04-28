@@ -5,12 +5,12 @@ using Timereporter.Core.Models;
 
 namespace Timereporter.Core.Collections
 {
-	public class WorkdayEnum : IEnumerator, IEnumerator<Workday>
+	public class WorkdayEnum : IEnumerator, IEnumerator<IWorkday>
 	{
 		private int _position = -1;
-		private Workday[] _workdays;
+		private IWorkday[] _workdays;
 
-		public WorkdayEnum(Workday[] workdays)
+		public WorkdayEnum(IWorkday[] workdays)
 		{
 			_workdays = workdays;
 		}
@@ -40,7 +40,7 @@ namespace Timereporter.Core.Collections
 			}
 		}
 
-		public Workday Current
+		public IWorkday Current
 		{
 			get
 			{
@@ -55,7 +55,7 @@ namespace Timereporter.Core.Collections
 			}
 		}
 
-		Workday IEnumerator<Workday>.Current
+		IWorkday IEnumerator<IWorkday>.Current
 		{
 			get
 			{

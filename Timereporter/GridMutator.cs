@@ -21,7 +21,7 @@ namespace Timereporter
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
 			for (int i = 0; i < workdays.Count; i++)
 			{
-				Workday wd = workdays[i];
+				IWorkday wd = workdays[i];
 				dgv.Rows.Add
 				(
 					wd.DateText,
