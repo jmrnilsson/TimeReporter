@@ -9,11 +9,16 @@ namespace Timereporter.Api.CoreTasks.EventLogReader
 {
 	public class EventsTimeSource : ITimeSource
 	{
-		const int limit = 22;
 		private readonly string pattern;
 		List<LogEntryBox> events;
 		DateTime limitAgo;
 
+		/// <summary>
+		///  Limit is used for throttling or speeding up things maybe. Dont know.
+		/// </summary>
+		/// <param name="pattern"></param>
+		/// <param name="now"></param>
+		/// <param name="limit"></param>
 		public EventsTimeSource(string pattern, Func<DateTime> now, int limit = 22)
 		{
 			events = new List<LogEntryBox>();
@@ -29,7 +34,7 @@ namespace Timereporter.Api.CoreTasks.EventLogReader
 			events.Add(@boxedEvent);
 		}
 
-		public IReadOnlyList<MinMax> GetMinMax(DateTime toDate)
+		public IReadOnlyList<MinMax> GetMinMax(DateTime fromDate)
 		{
 			var query =
 			(
@@ -47,7 +52,7 @@ namespace Timereporter.Api.CoreTasks.EventLogReader
 			).ToList();
 
 			// Max, because seems confused about DLS
-			return query.SkipWhile(e => e.Min < toDate).ToList().AsReadOnly();
+			return query.SkipWhile(e => e.Min < fromDate).ToList().AsReadOnly();
 		}
 	}
 }

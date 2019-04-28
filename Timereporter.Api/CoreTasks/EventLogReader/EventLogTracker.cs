@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Timereporter.Core.Collections;
 
 namespace Timereporter.Api.CoreTasks.EventLogReader
 {
@@ -32,7 +33,8 @@ namespace Timereporter.Api.CoreTasks.EventLogReader
 				i++;
 			}
 
-			return eventTimeSource.GetMinMax(dateTimeValueFactory.LocalNow()).Select(mm => mm.ToString()).ToArray();
+			var mondayAgo = WorkdayHelper.GetTwoMondaysAgo(dateTimeValueFactory.LocalNow());
+			return eventTimeSource.GetMinMax(mondayAgo).Select(mm => mm.ToString()).ToArray();
 		}
 	}
 }

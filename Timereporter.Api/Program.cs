@@ -21,6 +21,13 @@ namespace Timereporter.Api
 				var tracker = ObjectFactory.Instance.EventLogTracker();
 				var dateTimeValueFactory = ObjectFactory.Instance.DateTimeValueFactory();
 				var printableRows = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", dateTimeValueFactory.LocalNow()));
+
+				Console.WriteLine("x");
+
+				foreach(var row in printableRows)
+				{
+					Console.WriteLine(row);
+				}
 			}
 			else
 			{

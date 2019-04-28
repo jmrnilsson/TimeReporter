@@ -28,7 +28,7 @@ Try
     Write-Output "Finisihed run (default)";
   }
 }
-Catch
+Finally
 {
   Set-Location $workdir;
 }
