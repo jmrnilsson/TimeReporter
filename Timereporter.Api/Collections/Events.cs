@@ -2,9 +2,10 @@
 using System.Linq;
 using Timereporter.Api.Models;
 using Timereporter.Api.Collections.Queries;
-using Event = Timereporter.Core.Entities.Event;
+using Event = Timereporter.Core.Models.Event;
 using System.Collections.Generic;
 using Timereporter.Api.Collections.Interfaces;
+using Timereporter.Core.Models;
 
 namespace Timereporter.Api.Collections
 {
@@ -51,7 +52,7 @@ namespace Timereporter.Api.Collections
 
 		public Event[] FindBy(Date query)
 		{
-			var start = new DateTime(query.Year, query.Month, query.Day);
+			var start = query.ToDateTime();
 			var exclusiveEnd = start.AddDays(1);
 			return FindBy(start, exclusiveEnd);
 		}
