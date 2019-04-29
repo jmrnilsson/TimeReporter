@@ -7,11 +7,11 @@ namespace Timereporter.Core.Collections
 {
 	public static class WorkdayHelper
 	{
-		public static Date GetTwoMondaysAgo(Date fromDate)
+		public static Date GetThreeMondaysAgo(Date fromDate)
 		{
 			// Pretty bad way of doing this. 
 			var q =
-				from i in Enumerable.Range(8, 31)
+				from i in Enumerable.Range(15, 38)
 				let maybeMonday = fromDate.With(-i)
 				// where maybeMonday.Is(DayOfWeek.Monday)
 				select maybeMonday;

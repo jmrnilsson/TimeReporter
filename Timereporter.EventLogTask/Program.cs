@@ -14,11 +14,11 @@ namespace Timereporter.EventLogTask
 			var tracker = ObjectFactory.Instance.EventLogTracker();
 			tracker.OnProgressChanged += Tracker_OnProgressChanged;
 			var dateTimeValueFactory = ObjectFactory.Instance.DateTimeValueFactory();
-			Date mondayAgo = WorkdayHelper.GetTwoMondaysAgo(dateTimeValueFactory.LocalToday());
-			IReadOnlyList<MinMax> rows = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", mondayAgo));
+			Date mondayAgo = WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
+			var minMaxes = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", mondayAgo));
 			
 			Console.WriteLine("done!\r\n");
-			Console.WriteLine(PrettyPrintAndPadWeekends(rows));
+			Console.WriteLine(minMaxes.PrettyPrint());
 			Console.WriteLine("Press any key to close.");
 			Console.ReadKey();
 		}
@@ -26,46 +26,6 @@ namespace Timereporter.EventLogTask
 		private static void Tracker_OnProgressChanged()
 		{
 			Console.Write(".");
-		}
-
-		/// <summary>
-		///  Temporary weekend padded row until perdier fix for this.. O_o
-		/// </summary>
-		/// <param name="minMaxes"></param>
-		/// <returns></returns>
-		private static string PrettyPrintAndPadWeekends(IReadOnlyList<MinMax> minMaxes)
-		{
-			const int padding = 14;
-			var sb = new StringBuilder();
-			var count = minMaxes.Count();
-
-			void PadAppend(string text)
-			{
-				sb.Append(text.PadRight(padding));
-			}
-
-			PadAppend("DATE");
-			PadAppend("DAY OF WEEK");
-			PadAppend("ARRIVAL");
-			PadAppend("LEAVE");
-			sb.AppendLine();
-
-			for (int i = 0; i < count; i++)
-			{
-				var minMax = minMaxes.ElementAt(i);
-				PadAppend(minMax.Min.ToString("yyyy-MM-dd"));
-				PadAppend(minMax.Min.DayOfWeek.ToString());
-				PadAppend(minMax.Min.ToString("HH:mm"));
-				PadAppend(minMax.Max.ToString("HH:mm"));
-				sb.AppendLine();
-
-				if (minMax.Min.DayOfWeek == DayOfWeek.Friday && i + 1 < count)
-				{
-					sb.AppendLine();
-				}
-			}
-
-			return sb.ToString();
 		}
 	}
 }

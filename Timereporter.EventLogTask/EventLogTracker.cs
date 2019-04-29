@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Optional;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace Timereporter.EventLogTask
 			this.eventLog = eventLog;
 		}
 
-		public IReadOnlyList<MinMax> FindBy(EventLogQuery query)
+		public MinMaxes FindBy(EventLogQuery query)
 		{
 			eventLog.Log = query.LogName;
 
@@ -44,25 +45,45 @@ namespace Timereporter.EventLogTask
 			}
 		}
 
-		private IReadOnlyList<MinMax> GetMinMax(List<IEventLogEntryProxy> entries, Date fromDate, string pattern)
+		private MinMaxes GetMinMax(List<IEventLogEntryProxy> entries, Date fromDate, string pattern, bool fill = true)
 		{
 			Date limit = dateTimeValueFactory.LocalToday(limitAt);
 
 			var q =
 				from e in entries
 				where Regex.IsMatch(e.Source, pattern)
-				where e.TimeWritten > limit.ToDateTime()
-				where e.TimeWritten.IsWeekday()
+				// where e.TimeWritten > limit.ToDateTime()
 				orderby e.TimeWritten ascending
 				group e by new Date(e.TimeWritten) into eg
+				where eg.Key >= fromDate
 				select new MinMax
 				(
+					eg.Key,
 					eg.Min(e => e.TimeWritten),
 					eg.Max(e => e.TimeWritten)
 				);
 
-			// Restrict to min because it sometime confuses itself with daylight savings.
-			return q.SkipWhile(e => e.Min < fromDate.ToDateTime()).ToList().AsReadOnly();
+			// Horrible filler. Do some kind of zip or combine or combinatoric variant.
+			if (fill)
+			{
+				var pairs = q.ToDictionary(mm => mm.Date, mm => mm);
+
+				foreach(Date date in Workdays.EnumerateDates(fromDate, dateTimeValueFactory.LocalToday()))
+				{
+					string key = date.ToString();
+					if (pairs.ContainsKey(key))
+					{
+						continue;
+					}
+					pairs[key] = new MinMax(date, Option.None<DateTime>(), Option.None<DateTime>());
+				}
+
+				q = pairs.Values.OrderBy(p => p.Date);
+			}
+
+			// Restrict to min because it sometime confuses itself with daylight savings. Below is a temporary
+			// construct.
+			return new MinMaxes(q);
 		}
 
 	}

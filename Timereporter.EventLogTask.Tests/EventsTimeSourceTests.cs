@@ -22,15 +22,20 @@ namespace Timereporter.EventLogTask.Tests
 		[Fact]
 		public void Results_Matches_Specified_Range_Exactly_No_Regular_Weekends()
 		{
-			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 10))).Select(mm => mm.ToString());
+			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 10)));
 
-			Assert.Contains("2011-11-11", actual.ElementAt(0));
-			Assert.Contains("2011-11-18", actual.Last());
-			Assert.Contains(actual, a => a.Contains("2011-11-14"));  // Midvalue
-			Assert.DoesNotContain(actual, a => a.Contains("2011-11-10"));  // Out of bounds, too early
-			Assert.DoesNotContain(actual, a => a.Contains("2011-11-22"));  // Out of bounds, too late
-			Assert.DoesNotContain(actual, a => a.Contains("2011-11-12"));  // Saturday
-			Assert.DoesNotContain(actual, a => a.Contains("2011-11-13"));  // Sunday
+			Assert.True(actual.Contains("2011-11-11"));
+			Assert.True(actual.Contains("2011-11-18"));
+			Assert.True(actual.Contains("2011-11-14"));
+			Assert.False(actual.Contains("2011-11-10"));  // Out of bounds, too early
+			Assert.False(actual.Contains("2011-11-22"));  // Out of bounds, too late
+			Assert.True(actual.Contains("2011-11-12"));  // Saturday
+			Assert.True(actual.Contains("2011-11-13"));  // Sunday
+
+			// Examples:
+			//Assert.Contains(actual, a => a.Contains("2011-11-14"));  // Midvalue
+			//Assert.DoesNotContain(actual, a => a.Contains("2011-11-10"));  // Out of bounds, too early
+
 		}
 
 		private static IEventLogProxy MakeEventLogFactory()

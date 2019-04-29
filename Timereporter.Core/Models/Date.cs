@@ -29,6 +29,14 @@ namespace Timereporter.Core.Models
 			this.date = new DateTime(year, month, day);
 		}
 
+		public Date(Date date)
+		{
+			this.year = date.year;
+			this.month = date.month;
+			this.day = date.day;
+			this.date = new DateTime(year, month, day);
+		}
+
 		public override string ToString()
 		{
 			return date.ToString("yyyy-MM-dd");
@@ -75,7 +83,25 @@ namespace Timereporter.Core.Models
 
 		public int CompareTo(Date other)
 		{
-			return other.ToDateTime().CompareTo(ToDateTime());
+			return ToDateTime().CompareTo(other.ToDateTime());
+		}
+
+		public static bool operator > (Date d0, Date d1)
+		{
+			return d0.CompareTo(d1) > 0;
+		}
+		public static bool operator < (Date d0, Date d1)
+		{
+			return d0.CompareTo(d1) < 0;
+		}
+
+		public static bool operator >= (Date d0, Date d1)
+		{
+			return d0.CompareTo(d1) >= 0;
+		}
+		public static bool operator <= (Date d0, Date d1)
+		{
+			return d0.CompareTo(d1) <= 0;
 		}
 	}
 }
