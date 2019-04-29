@@ -13,22 +13,5 @@ namespace Timereporter.EventLogTask
 			Min = min;
 			Max = max;
 		}
-
-		public override string ToString()
-		{
-			var sb = new StringBuilder();
-			void PadAppend(string text)
-			{
-				sb.Append(text.PadLeft(12));
-			}
-
-			PadAppend(Min.ToString("yyyy-MM-dd"));
-			PadAppend(Min.DayOfWeek.ToString());
-			PadAppend(Min.ToString("HH:mm"));
-			PadAppend(Max.ToString("HH:mm"));
-
-			return sb.ToString();
-		}
-
 	}
 }

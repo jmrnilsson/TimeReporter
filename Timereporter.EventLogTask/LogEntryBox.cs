@@ -20,15 +20,6 @@ namespace Timereporter.EventLogTask
 		public string Date => entry.TimeWritten.ToString("yyyy-MM-dd");
 		public string Source => entry.Source;
 
-		public bool IsWeekday()
-		{
-			DayOfWeek dayOfWeek = entry.TimeWritten.DayOfWeek;
 
-			if (dayOfWeek == DayOfWeek.Saturday || dayOfWeek == DayOfWeek.Sunday)
-			{
-				return false;
-			}
-			return true;
-		}
 	}
 }

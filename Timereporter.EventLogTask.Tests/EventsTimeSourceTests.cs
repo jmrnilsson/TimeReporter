@@ -22,9 +22,9 @@ namespace Timereporter.EventLogTask.Tests
 		[Fact]
 		public void Results_Matches_Specified_Range_Exactly_No_Regular_Weekends()
 		{
-			string[] actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 10)));
+			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 10))).Select(mm => mm.ToString());
 
-			Assert.Contains("2011-11-11", actual[0]);
+			Assert.Contains("2011-11-11", actual.ElementAt(0));
 			Assert.Contains("2011-11-18", actual.Last());
 			Assert.Contains(actual, a => a.Contains("2011-11-14"));  // Midvalue
 			Assert.DoesNotContain(actual, a => a.Contains("2011-11-10"));  // Out of bounds, too early
