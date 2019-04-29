@@ -5,10 +5,11 @@ using Timereporter.Core;
 using Timereporter.Core.Models;
 using Timereporter.EventLogTask.Proxies;
 using Xunit;
+using Moq;
+using FluentAssertions;
 
 namespace Timereporter.EventLogTask.Tests
 {
-	// TODO: Remove Microsoft.NET.Test.Sdk
 	public class EventLogTrackerTests
 	{
 		private EventLogTracker tracker = new EventLogTracker(MakeDateTimeValueFactoryMock(), MakeEventLogFactory());
@@ -17,28 +18,19 @@ namespace Timereporter.EventLogTask.Tests
 		private const int startDay = 11;
 		private readonly DateTime start = new DateTime(startYear, startMonth, startDay);
 
+
 		[Fact]
-		public void Results_Matches_Specified_Range_Exactly()
+		public void Results_Matches_Specified_Range_Exactly_No_Regular_Weekends()
 		{
 			string[] actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 10)));
 
 			Assert.Contains("2011-11-11", actual[0]);
 			Assert.Contains("2011-11-18", actual.Last());
-
-			bool foundMidvalue = false;
-			foreach(var a in actual)
-			{
-				Assert.DoesNotContain("2011-11-10", a);  // Out of bounds, too early
-				Assert.DoesNotContain("2011-11-22", a);  // Out of bounds, too late
-				Assert.DoesNotContain("2011-11-12", a);  // Saturday
-				Assert.DoesNotContain("2011-11-13", a);  // Sunday
-
-				if (a.Contains("2011-11-14"))
-				{
-					foundMidvalue = true;
-				}
-			}
-			Assert.True(foundMidvalue);
+			Assert.Contains(actual, a => a.Contains("2011-11-14"));  // Midvalue
+			Assert.DoesNotContain(actual, a => a.Contains("2011-11-10"));  // Out of bounds, too early
+			Assert.DoesNotContain(actual, a => a.Contains("2011-11-22"));  // Out of bounds, too late
+			Assert.DoesNotContain(actual, a => a.Contains("2011-11-12"));  // Saturday
+			Assert.DoesNotContain(actual, a => a.Contains("2011-11-13"));  // Sunday
 		}
 
 		private static IEventLogProxy MakeEventLogFactory()
@@ -60,13 +52,10 @@ namespace Timereporter.EventLogTask.Tests
 
 		private static IDateTimeValueFactory MakeDateTimeValueFactoryMock()
 		{
-			return new DateTimeValueFactoryFake(startYear, startMonth, startDay);
-
-			// Moq doesn't persist Nuget Install. Wait with this.
-
-			//Mock<IDateTimeValueFactory> mock = new Mock<IDateTimeValueFactory>();
-			//mock.Setup(m => m.LocalToday(It.IsAny<int>())).Returns(new Date(start.AddDays(-22)));
-			//return mock.Object;
+			Mock<IDateTimeValueFactory> mock = new Mock<IDateTimeValueFactory>();
+			DateTime start_ = new DateTime(startYear, startMonth, startDay);
+			mock.Setup(m => m.LocalToday(It.IsAny<int>())).Returns(new Date(start_.AddDays(-22)));
+			return mock.Object;
 		}
 	}
 }
