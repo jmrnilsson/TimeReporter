@@ -18,7 +18,7 @@ namespace Timereporter.EventLogTask.Tests
 		private readonly DateTime start = new DateTime(startYear, startMonth, startDay);
 
 		[Fact]
-		public void Results_Matches_Specified_Range_Exactly()
+		public void Results_Matches_Specified_Range_Exactly_No_Regular_Weekends()
 		{
 			string[] actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 10)));
 
