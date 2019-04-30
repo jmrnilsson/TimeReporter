@@ -14,15 +14,12 @@ namespace Timereporter.EventLogTask
 
 	public class EventLogTracker
 	{
-		private const int limitAt = -21;
 		private const int reportProgressBy = 1000;
-		private readonly IDateTimeValueFactory dateTimeValueFactory;
 		private readonly IEventLogProxy eventLog;
 		public event ProgressChanged OnProgressChanged;
 		
-		public EventLogTracker(IDateTimeValueFactory dateTimeValueFactory, IEventLogProxy eventLog)
+		public EventLogTracker(IEventLogProxy eventLog)
 		{
-			this.dateTimeValueFactory = dateTimeValueFactory;
 			this.eventLog = eventLog;
 		}
 
@@ -41,7 +38,7 @@ namespace Timereporter.EventLogTask
 			return new MinMaxes(summary);
 		}
 
-		private void ReportProgress(int i, IEventLogEntryProxy a)
+		private void ReportProgress(int i, IEventLogEntryProxy e)
 		{
 			if (OnProgressChanged != null && i % reportProgressBy == 0)
 			{
