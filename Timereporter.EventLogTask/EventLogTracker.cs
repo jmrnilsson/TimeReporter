@@ -1,9 +1,7 @@
 ﻿using Optional;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Timereporter.Core;
 using Timereporter.Core.Collections;
@@ -22,7 +20,6 @@ namespace Timereporter.EventLogTask
 		private readonly IEventLogProxy eventLog;
 		public event ProgressChanged OnProgressChanged;
 		
-
 		public EventLogTracker(IDateTimeValueFactory dateTimeValueFactory, IEventLogProxy eventLog)
 		{
 			this.dateTimeValueFactory = dateTimeValueFactory;
@@ -33,8 +30,15 @@ namespace Timereporter.EventLogTask
 		{
 			eventLog.Log = query.LogName;
 
-			var events = eventLog.Entries.ToListAndTap(ReportProgress, e => Regex.IsMatch(e.Source, query.Pattern));
-			return GetMinMax(events,  query.FromDate, query.Pattern);
+			var entries = eventLog.Entries.ToListAndTap(ReportProgress, e => Regex.IsMatch(e.Source, query.Pattern));
+			var summary = Summarize(entries, query.From, query.To, query.Pattern);
+
+			if (query.Fill)
+			{
+				summary = Fill(summary, query.From, query.To);
+			}
+
+			return new MinMaxes(summary);
 		}
 
 		private void ReportProgress(int i, IEventLogEntryProxy a)
@@ -45,46 +49,32 @@ namespace Timereporter.EventLogTask
 			}
 		}
 
-		private MinMaxes GetMinMax(List<IEventLogEntryProxy> entries, Date fromDate, string pattern, bool fill = true)
+		private IEnumerable<MinMax> Summarize(List<IEventLogEntryProxy> entries, Date from, Date toDate, string pattern)
 		{
-			Date limit = dateTimeValueFactory.LocalToday(limitAt);
-
-			var q =
+			return
 				from e in entries
 				where Regex.IsMatch(e.Source, pattern)
-				// where e.TimeWritten > limit.ToDateTime()
 				orderby e.TimeWritten ascending
 				group e by new Date(e.TimeWritten) into eg
-				where eg.Key >= fromDate
+				where !eg.Key.IsWeekend()
+				where eg.Key >= @from
+				where eg.Key <= toDate
 				select new MinMax
 				(
 					eg.Key,
 					eg.Min(e => e.TimeWritten),
 					eg.Max(e => e.TimeWritten)
 				);
-
-			// Horrible filler. Do some kind of zip or combine or combinatoric variant.
-			if (fill)
-			{
-				var pairs = q.ToDictionary(mm => mm.Date, mm => mm);
-
-				foreach(Date date in Workdays.EnumerateDates(fromDate, dateTimeValueFactory.LocalToday()))
-				{
-					string key = date.ToString();
-					if (pairs.ContainsKey(key))
-					{
-						continue;
-					}
-					pairs[key] = new MinMax(date, Option.None<DateTime>(), Option.None<DateTime>());
-				}
-
-				q = pairs.Values.OrderBy(p => p.Date);
-			}
-
-			// Restrict to min because it sometime confuses itself with daylight savings. Below is a temporary
-			// construct.
-			return new MinMaxes(q);
 		}
 
+		IEnumerable<MinMax> Fill(IEnumerable<MinMax> minMaxes, Date from, Date to)
+		{
+			var kvp = minMaxes.ToDictionary(mm => mm.Date, mm => mm);
+
+			foreach (Date date in Workdays.EnumerateDates(from, to))
+			{
+				yield return kvp.GetValueOrDefault(date.DateText(), new MinMax(date, Option.None<DateTime>(), Option.None<DateTime>()));
+			}
+		}
 	}
 }

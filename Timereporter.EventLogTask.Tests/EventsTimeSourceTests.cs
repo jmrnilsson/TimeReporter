@@ -10,24 +10,28 @@ using FluentAssertions;
 
 namespace Timereporter.EventLogTask.Tests
 {
-	public class EventLogTrackerTests
+	public class EventLogTrackerTests : IDisposable
 	{
-		private EventLogTracker tracker = new EventLogTracker(MakeDateTimeValueFactoryMock(), MakeEventLogFactory());
+		private EventLogTracker tracker;
 		private const int startYear = 2011;
 		private const int startMonth = 11;
 		private const int startDay = 11;
 		private readonly DateTime start = new DateTime(startYear, startMonth, startDay);
 
+		public EventLogTrackerTests()
+		{
+			tracker = new EventLogTracker(MakeDateTimeValueFactoryMock(), MakeEventLogFactory());
+		}
 
 		[Fact]
-		public void Results_Matches_Specified_Range_Exactly_No_Regular_Weekends()
+		public void Results_Matches_Specified_Range_Exactly_Keep_Regular_Weekends_With_Fill()
 		{
-			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 10)));
+			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 11), new Date(2011, 11, 21), fill: true));
 
 			Assert.True(actual.Contains("2011-11-11"));
 			Assert.True(actual.Contains("2011-11-18"));
 			Assert.True(actual.Contains("2011-11-14"));
-			Assert.False(actual.Contains("2011-11-10"));  // Out of bounds, too early
+			Assert.False(actual.Contains("2011-11-09"));  // Out of bounds, too early
 			Assert.False(actual.Contains("2011-11-22"));  // Out of bounds, too late
 			Assert.True(actual.Contains("2011-11-12"));  // Saturday
 			Assert.True(actual.Contains("2011-11-13"));  // Sunday
@@ -38,14 +42,38 @@ namespace Timereporter.EventLogTask.Tests
 
 		}
 
-		private static IEventLogProxy MakeEventLogFactory()
+		[Fact]
+		public void Results_Matches_Specified_Range_Exactly_No_Regular_Weekends()
+		{
+			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 10), new Date(2011, 11, 21)));
+
+			Assert.True(actual.Contains("2011-11-18"));
+			Assert.False(actual.Contains("2011-11-12"));  // Saturday
+			Assert.False(actual.Contains("2011-11-13"));  // Sunday
+		}
+
+		[Fact]
+		public void Results_Matches_Specified_Range_Exactly_No_Official_Holidays()
+		{
+			tracker = new EventLogTracker(MakeDateTimeValueFactoryMock(2019, 4, 18), MakeEventLogFactory(2019, 4, 18));
+			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2019, 4, 18), new Date(2019, 4, 30)));
+
+			Assert.True(actual.Contains("2019-04-18"));
+			Assert.False(actual.Contains("2019-04-19"));
+			Assert.False(actual.Contains("2019-04-20"));
+			Assert.False(actual.Contains("2019-04-22"));  // Saturday
+			Assert.True(actual.Contains("2019-04-30"));  // Sunday
+		}
+
+
+		private static IEventLogProxy MakeEventLogFactory(int year = startYear, int month = startMonth, int day = startDay)
 		{
 			IEnumerable<IEventLogEntryProxy> MakeEventLogEntries()
 			{
 				const int h = 4;
-				DateTime start = new DateTime(startYear, startMonth, startDay);
+				DateTime start = new DateTime(year, month, day);
 				int i = 0;
-				while(start.AddHours(i*h) < start.AddDays(10))
+				while(start.AddHours(i * h) < start.AddDays(20))
 				{
 					yield return new EventLogEntryStub(start.AddHours(i * h), i % 2 == 0 ? "ESENT" : "SOMETHING ELSE");
 					i++;
@@ -55,12 +83,17 @@ namespace Timereporter.EventLogTask.Tests
 			return mock;
 		}
 
-		private static IDateTimeValueFactory MakeDateTimeValueFactoryMock()
+		private static IDateTimeValueFactory MakeDateTimeValueFactoryMock(int year = startYear, int month = startMonth, int day = startDay)
 		{
 			Mock<IDateTimeValueFactory> mock = new Mock<IDateTimeValueFactory>();
-			DateTime start_ = new DateTime(startYear, startMonth, startDay);
+			DateTime start_ = new DateTime(year, month, day);
 			mock.Setup(m => m.LocalToday(It.IsAny<int>())).Returns(new Date(start_.AddDays(-22)));
 			return mock.Object;
+		}
+
+		public void Dispose()
+		{
+			tracker = null;
 		}
 	}
 }

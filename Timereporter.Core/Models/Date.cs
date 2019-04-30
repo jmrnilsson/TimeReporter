@@ -39,6 +39,11 @@ namespace Timereporter.Core.Models
 
 		public override string ToString()
 		{
+			return DateText();
+		}
+
+		public string DateText()
+		{
 			return date.ToString("yyyy-MM-dd");
 		}
 

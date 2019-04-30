@@ -14,8 +14,9 @@ namespace Timereporter.EventLogTask
 			var tracker = ObjectFactory.Instance.EventLogTracker();
 			tracker.OnProgressChanged += Tracker_OnProgressChanged;
 			var dateTimeValueFactory = ObjectFactory.Instance.DateTimeValueFactory();
-			Date mondayAgo = WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
-			var minMaxes = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", mondayAgo));
+			Date from = WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
+			Date to = dateTimeValueFactory.LocalToday();
+			var minMaxes = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", from, to, fill: true));
 			
 			Console.WriteLine("done!\r\n");
 			Console.WriteLine(minMaxes.PrettyPrint());

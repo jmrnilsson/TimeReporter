@@ -8,15 +8,19 @@ namespace Timereporter.EventLogTask
 {
 	public struct EventLogQuery
 	{
-		public EventLogQuery(string pattern, string logName, Date fromDate)
+		public EventLogQuery(string pattern, string logName, Date fromDate, Date toDate, bool fill = false)
 		{
 			Pattern = pattern;
 			LogName = logName;
-			FromDate = fromDate;
+			From = fromDate;
+			To = toDate;
+			Fill = fill;
 		}
 
 		public string Pattern { get; }
 		public string LogName { get; }
-		public Date FromDate { get; }
+		public Date From { get; }
+		public Date To { get; }
+		public bool Fill { get; }
 	}
 }
