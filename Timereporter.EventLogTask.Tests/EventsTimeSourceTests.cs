@@ -20,7 +20,7 @@ namespace Timereporter.EventLogTask.Tests
 
 		public EventLogTrackerTests()
 		{
-			tracker = new EventLogTracker(MakeDateTimeValueFactoryMock(), MakeEventLogFactory());
+			tracker = new EventLogTracker(MakeEventLogFactory());
 		}
 
 		[Fact]
@@ -83,13 +83,13 @@ namespace Timereporter.EventLogTask.Tests
 			return mock;
 		}
 
-		private static IDateTimeValueFactory MakeDateTimeValueFactoryMock(int year = startYear, int month = startMonth, int day = startDay)
-		{
-			Mock<IDateTimeValueFactory> mock = new Mock<IDateTimeValueFactory>();
-			DateTime start_ = new DateTime(year, month, day);
-			mock.Setup(m => m.LocalToday(It.IsAny<int>())).Returns(new Date(start_.AddDays(-22)));
-			return mock.Object;
-		}
+		//private static IDateTimeValueFactory MakeDateTimeValueFactoryMock(int year = startYear, int month = startMonth, int day = startDay)
+		//{
+		//	Mock<IDateTimeValueFactory> mock = new Mock<IDateTimeValueFactory>();
+		//	DateTime start_ = new DateTime(year, month, day);
+		//	mock.Setup(m => m.LocalToday(It.IsAny<int>())).Returns(new Date(start_.AddDays(-22)));
+		//	return mock.Object;
+		//}
 
 		public void Dispose()
 		{

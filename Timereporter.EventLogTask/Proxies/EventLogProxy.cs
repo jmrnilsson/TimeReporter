@@ -1,31 +1,50 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Timereporter.EventLogTask.Proxies
 {
-
-	public class EventLogProxy : IEventLogProxy
+	public class EventLogProxy : IEventLogProxy, IDisposable
 	{
-		private readonly EventLog eventLog;
-
-		public EventLogProxy(EventLog eventLog)
+		private readonly Func<EventLog> eventLogFactory;
+		private Lazy<EventLog> eventLog;
+		
+		public EventLogProxy(Func<EventLog> eventLogFactory)
 		{
-			this.eventLog = eventLog;
+			this.eventLogFactory = eventLogFactory;
+			this.eventLog = new Lazy<EventLog>(eventLogFactory);
 		}
 
 		public string Log
 		{
-			get => eventLog.Log;
-			set => eventLog.Log = value;
+			get => eventLog.Value.Log;
+			set => eventLog.Value.Log = value;
 		}
 
 		public IEnumerable<IEventLogEntryProxy> Entries
 		{
 			get
 			{
-				foreach(EventLogEntry e in eventLog.Entries)
+				foreach(EventLogEntry e in eventLog.Value.Entries)
 				{
 					yield return new EventLogEntryProxy(e);
+				}
+			}
+		}
+
+		// Try-finally because of the lazy initilization of EventLog and to mitigate any issues
+		// arrising from proxy mistakenly are registered with different life-cycle than EventLog.
+		public void Dispose()
+		{
+			if (eventLog.IsValueCreated)
+			{
+				try
+				{
+					eventLog.Value.Dispose();
+				}
+				finally
+				{
+					eventLog = new Lazy<EventLog>(eventLogFactory());
 				}
 			}
 		}

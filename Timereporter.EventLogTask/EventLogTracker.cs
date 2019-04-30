@@ -23,7 +23,7 @@ namespace Timereporter.EventLogTask
 			this.eventLog = eventLog;
 		}
 
-		public MinMaxes FindBy(EventLogQuery query)
+		public Dictionary<string, MinMax> FindBy(EventLogQuery query)
 		{
 			eventLog.Log = query.LogName;
 
@@ -35,7 +35,7 @@ namespace Timereporter.EventLogTask
 				summary = Fill(summary, query.From, query.To);
 			}
 
-			return new MinMaxes(summary);
+			return summary.ToDictionary(mm => mm.Date, mm => mm);
 		}
 
 		private void ReportProgress(int i, IEventLogEntryProxy e)
@@ -46,7 +46,7 @@ namespace Timereporter.EventLogTask
 			}
 		}
 
-		private IEnumerable<MinMax> Summarize(List<IEventLogEntryProxy> entries, Date from, Date toDate, string pattern)
+		private IEnumerable<MinMax> Summarize(List<IEventLogEntryProxy> entries, Date from, Date to, string pattern)
 		{
 			return
 				from e in entries
@@ -55,7 +55,7 @@ namespace Timereporter.EventLogTask
 				group e by new Date(e.TimeWritten) into eg
 				where !eg.Key.IsWeekend()
 				where eg.Key >= @from
-				where eg.Key <= toDate
+				where eg.Key <= to
 				select new MinMax
 				(
 					eg.Key,
