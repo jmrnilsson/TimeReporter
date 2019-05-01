@@ -104,9 +104,17 @@ namespace Timereporter.Core.Models
 		{
 			return d0.CompareTo(d1) >= 0;
 		}
-		public static bool operator <= (Date d0, Date d1)
+		public static bool operator <=(Date d0, Date d1)
 		{
 			return d0.CompareTo(d1) <= 0;
+		}
+		public static bool operator ==(Date d0, Date d1)
+		{
+			return d0.Equals(d1);
+		}
+		public static bool operator !=(Date d0, Date d1)
+		{
+			return !d0.Equals(d1);
 		}
 	}
 }

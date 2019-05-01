@@ -9,6 +9,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="NodaTime" Version="2.4.5" />
+    <PackageReference Include="NodaTime.Serialization.JsonNet" Version="2.2.0" />
     <PackageReference Include="Optional" Version="4.0.0" />
   </ItemGroup>
 

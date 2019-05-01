@@ -1,4 +1,5 @@
-﻿using Optional;
+﻿using NodaTime;
+using Optional;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace Timereporter.EventLogTask
 			this.eventLog = eventLog;
 		}
 
-		public Dictionary<string, MinMax> FindBy(EventLogQuery query)
+		public Dictionary<string, Time> FindBy(EventLogQuery query)
 		{
 			eventLog.Log = query.LogName;
 
@@ -46,8 +47,10 @@ namespace Timereporter.EventLogTask
 			}
 		}
 
-		private IEnumerable<MinMax> Summarize(List<IEventLogEntryProxy> entries, Date from, Date to, string pattern)
+		private IEnumerable<Time> Summarize(List<IEventLogEntryProxy> entries, Date from, Date to, string pattern)
 		{
+			Instant now = SystemClock.Instance.GetCurrentInstant();
+			DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
 			return
 				from e in entries
 				where Regex.IsMatch(e.Source, pattern)
@@ -56,21 +59,22 @@ namespace Timereporter.EventLogTask
 				where !eg.Key.IsWeekend()
 				where eg.Key >= @from
 				where eg.Key <= to
-				select new MinMax
+				select new Time
 				(
 					eg.Key,
 					eg.Min(e => e.TimeWritten),
-					eg.Max(e => e.TimeWritten)
+					eg.Max(e => e.TimeWritten),
+					tz
 				);
 		}
 
-		IEnumerable<MinMax> Fill(IEnumerable<MinMax> minMaxes, Date from, Date to)
+		IEnumerable<Time> Fill(IEnumerable<Time> minMaxes, Date from, Date to)
 		{
 			var kvp = minMaxes.ToDictionary(mm => mm.Date, mm => mm);
 
 			foreach (Date date in Workdays.EnumerateDates(from, to))
 			{
-				yield return kvp.GetValueOrDefault(date.DateText(), new MinMax(date, Option.None<DateTime>(), Option.None<DateTime>()));
+				yield return kvp.GetValueOrDefault(date.DateText(), new Time(date, Option.None<Instant>(), Option.None<Instant>()));
 			}
 		}
 	}

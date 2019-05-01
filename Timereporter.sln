@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timereporter.Api", "Timerep
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timereporter.Core", "Timereporter.Core\Timereporter.Core.csproj", "{7B24AB82-DED4-41C8-9B89-D8569D1BB308}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timereporter.EventLogTask", "Timereporter.EventLogTask\Timereporter.EventLogTask.csproj", "{2051CE09-F67A-435A-9FC6-B6DCAD5E327E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timereporter.EventLogTask", "Timereporter.EventLogTask\Timereporter.EventLogTask.csproj", "{2051CE09-F67A-435A-9FC6-B6DCAD5E327E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timereporter.EventLogTask.Tests", "Timereporter.EventLogTask.Tests\Timereporter.EventLogTask.Tests.csproj", "{B7168C80-7AE1-4DF7-94B1-312333C16F81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timereporter.Tests", "Timereporter.EventLogTask.Tests\Timereporter.Tests.csproj", "{B7168C80-7AE1-4DF7-94B1-312333C16F81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

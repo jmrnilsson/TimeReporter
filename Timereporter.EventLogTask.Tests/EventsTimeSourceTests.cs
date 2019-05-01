@@ -6,7 +6,6 @@ using Timereporter.Core.Models;
 using Timereporter.EventLogTask.Proxies;
 using Xunit;
 using Moq;
-using FluentAssertions;
 
 namespace Timereporter.EventLogTask.Tests
 {

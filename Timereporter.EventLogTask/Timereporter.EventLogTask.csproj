@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <PackageReference Include="ConsoleTables" Version="2.3.0" />
+    <PackageReference Include="NodaTime" Version="2.4.5" />
+    <PackageReference Include="NodaTime.Serialization.JsonNet" Version="2.2.0" />
     <PackageReference Include="Optional" Version="4.0.0" />
     <PackageReference Include="SimpleInjector" Version="4.5.1" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="4.5.0" />

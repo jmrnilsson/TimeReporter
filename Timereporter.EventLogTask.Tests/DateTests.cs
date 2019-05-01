@@ -18,12 +18,16 @@ namespace Timereporter.EventLogTask.Tests
 		//}
 
 		[Fact]
-		public void VerifyOperator_Equals()
+		public void VerifyOperator_Equals_And_NotEquals()
 		{
 			var date0 = new Date(2019, 1, 1);
 			var date1 = new Date(2019, 1, 1);
-			// Assert.True(date0 == date1);
+			var date2 = new Date(2020, 1, 1);
+			Assert.True(date0 == date1);
+			Assert.False(date0 != date1);
+			Assert.True(date0 != date2);
 			Assert.True(date0.Equals(date1));
+			Assert.False(date0.Equals(date2));
 		}
 
 		[Fact]

@@ -28,13 +28,13 @@ namespace Timereporter.Api.Controllers
 		//}
 
 		[HttpGet("{year:int}/{month:int}")]
-		public IEnumerable<Event> Get(int year, int month)
+		public IEnumerable<Event> Find(int year, int month)
 		{
 			return events.FindBy(new YearMonth(year, month));
 		}
 
 		[HttpGet("{year:int}/{month}/{day:int}")]
-		public IEnumerable<Event> Get(int year, int month, int day)
+		public IEnumerable<Event> Find(int year, int month, int day)
 		{
 			return events.FindBy(new Date(year, month, day));
 		}
@@ -49,7 +49,6 @@ namespace Timereporter.Api.Controllers
 		{
 			events.Add(new Event(kind, moment));
 		}
-
 
 		//// PUT api/values/5
 		//[HttpPut("{id}")]

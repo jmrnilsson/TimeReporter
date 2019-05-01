@@ -47,3 +47,12 @@ DATE          DAY OF WEEK   ARRIVAL       LEAVE
 
 Press any key to close.
 ```
+
+## Links 
+
+### Nodatime and local datetime-handling
+
+- https://nodatime.org/2.3.x/userguide/type-choices
+- https://stackoverflow.com/questions/21029489/getting-the-systems-localdatetime-in-noda-time
+- https://cmikavac.net/2018/04/05/converting-to-and-from-local-time-in-c-net-with-noda-time/
+- https://nodatime.org/1.4.x/api/NodaTime.LocalDateTime.html

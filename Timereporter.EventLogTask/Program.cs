@@ -7,6 +7,8 @@ using System.Diagnostics;
 using Timereporter.Core;
 using ConsoleTables;
 using System.Collections.Generic;
+using NodaTime.TimeZones;
+using NodaTime;
 
 namespace Timereporter.EventLogTask
 {
@@ -40,7 +42,7 @@ namespace Timereporter.EventLogTask
 		{
 			container.Register<EventLogTracker>();
 			container.Register<IEventLogProxy, EventLogProxy>(Lifestyle.Transient);
-			container.Register(EventLogFactory, Lifestyle.Transient);
+			container.Register(EventLogFactory, Lifestyle.Transient); 
 			container.Register<IDateTimeValueFactory, DateTimeValueFactory>(Lifestyle.Transient);
 		}
 
@@ -49,14 +51,20 @@ namespace Timereporter.EventLogTask
 			return () => new EventLog();
 		}
 
-		private static string PrintConsoleTable(Dictionary<string, MinMax> minMaxes)
+		private static string PrintConsoleTable(Dictionary<string, Time> minMaxes)
 		{
+			var tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
 			var table = new ConsoleTable("DATE", "DAY OF WEEK", "ARRIVAL", "LEAVE");
+
+			string LocalTime(Instant instant)
+			{
+				return instant.InZone(tz).LocalDateTime.ToDateTimeUnspecified().ToString("HH:mm");
+			}
 
 			foreach(var v in minMaxes.Values)
 			{
-				var min = v.Min.Match(some: m => m.ToString("HH:mm"), none: () => "-");
-				var max = v.Max.Match(some: m => m.ToString("HH:mm"), none: () => "-");
+				var min = v.Min.Match(some: LocalTime, none: () => "-");
+				var max = v.Max.Match(some: LocalTime, none: () => "-");
 				table.AddRow(v.Date, v.DayOfWeek, min, max);
 			}
 
