@@ -28,17 +28,17 @@ namespace Timereporter.EventLogTask.Tests
 		{
 			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 11), new Date(2011, 11, 21), fill: true));
 
-			Assert.True(actual.Contains("2011-11-11"));
-			Assert.True(actual.Contains("2011-11-18"));
-			Assert.True(actual.Contains("2011-11-14"));
-			Assert.False(actual.Contains("2011-11-09"));  // Out of bounds, too early
-			Assert.False(actual.Contains("2011-11-22"));  // Out of bounds, too late
-			Assert.True(actual.Contains("2011-11-12"));  // Saturday
-			Assert.True(actual.Contains("2011-11-13"));  // Sunday
+			Assert.True(actual.ContainsKey("2011-11-11"));
+			Assert.True(actual.ContainsKey("2011-11-18"));
+			Assert.True(actual.ContainsKey("2011-11-14"));
+			Assert.False(actual.ContainsKey("2011-11-09"));  // Out of bounds, too early
+			Assert.False(actual.ContainsKey("2011-11-22"));  // Out of bounds, too late
+			Assert.True(actual.ContainsKey("2011-11-12"));  // Saturday
+			Assert.True(actual.ContainsKey("2011-11-13"));  // Sunday
 
 			// Examples:
-			//Assert.Contains(actual, a => a.Contains("2011-11-14"));  // Midvalue
-			//Assert.DoesNotContain(actual, a => a.Contains("2011-11-10"));  // Out of bounds, too early
+			//Assert.ContainsKey(actual, a => a.ContainsKey("2011-11-14"));  // Midvalue
+			//Assert.DoesNotContain(actual, a => a.ContainsKey("2011-11-10"));  // Out of bounds, too early
 
 		}
 
@@ -47,22 +47,22 @@ namespace Timereporter.EventLogTask.Tests
 		{
 			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 10), new Date(2011, 11, 21)));
 
-			Assert.True(actual.Contains("2011-11-18"));
-			Assert.False(actual.Contains("2011-11-12"));  // Saturday
-			Assert.False(actual.Contains("2011-11-13"));  // Sunday
+			Assert.True(actual.ContainsKey("2011-11-18"));
+			Assert.False(actual.ContainsKey("2011-11-12"));  // Saturday
+			Assert.False(actual.ContainsKey("2011-11-13"));  // Sunday
 		}
 
 		[Fact]
 		public void Results_Matches_Specified_Range_Exactly_No_Official_Holidays()
 		{
-			tracker = new EventLogTracker(MakeDateTimeValueFactoryMock(2019, 4, 18), MakeEventLogFactory(2019, 4, 18));
+			tracker = new EventLogTracker(MakeEventLogFactory(2019, 4, 18));
 			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2019, 4, 18), new Date(2019, 4, 30)));
 
-			Assert.True(actual.Contains("2019-04-18"));
-			Assert.False(actual.Contains("2019-04-19"));
-			Assert.False(actual.Contains("2019-04-20"));
-			Assert.False(actual.Contains("2019-04-22"));  // Saturday
-			Assert.True(actual.Contains("2019-04-30"));  // Sunday
+			Assert.True(actual.ContainsKey("2019-04-18"));
+			Assert.False(actual.ContainsKey("2019-04-19"));
+			Assert.False(actual.ContainsKey("2019-04-20"));
+			Assert.False(actual.ContainsKey("2019-04-22"));  // Saturday
+			Assert.True(actual.ContainsKey("2019-04-30"));  // Sunday
 		}
 
 

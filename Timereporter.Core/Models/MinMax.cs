@@ -1,8 +1,7 @@
 ﻿using Optional;
 using System;
-using Timereporter.Core.Models;
 
-namespace Timereporter.EventLogTask
+namespace Timereporter.Core.Models
 {
 
 	public class MinMax
