@@ -9,6 +9,12 @@ using ConsoleTables;
 using System.Collections.Generic;
 using NodaTime.TimeZones;
 using NodaTime;
+using System.Net.Http;
+using System.Net;
+using Newtonsoft.Json;
+using System.Text;
+using System.Linq;
+using System.Net.Http.Headers;
 
 namespace Timereporter.EventLogTask
 {
@@ -26,11 +32,46 @@ namespace Timereporter.EventLogTask
 			Date from = WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
 			Date to = dateTimeValueFactory.LocalToday();
 			var minMaxes = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", from, to, fill: true));
+			var chunks = tracker.Chunkmap(minMaxes).ToList();
 
 			Console.WriteLine("done!\r\n");
 			Console.WriteLine(PrintConsoleTable(minMaxes));
+			Console.WriteLine("Synchronizing results..");
+
+			using (var client = new HttpClient())
+			{
+				client.DefaultRequestHeaders.Clear();
+				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+				foreach (var chunk in chunks)
+				{
+					Post(client, chunk);
+				}
+			}
+
+			Console.WriteLine("done!\r\n");
 			Console.WriteLine("Press any key to close.");
 			Console.ReadKey();
+		}
+
+		private static void Post(HttpClient client, List<Event> events)
+		{
+			// Previous url http://localhost:53762/api/events
+
+			var json = JsonConvert.SerializeObject(new Events { Events_ = events });
+			var content = new StringContent(json, Encoding.UTF8, "application/json");
+			content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+			var result = client.PostAsync("http://localhost:53762/api/events", content).Result;
+
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new ApplicationException("esent rest");
+			}
+
+			Console.Write("Post");
+
+			Tracker_OnProgressChanged();
 		}
 
 		private static void Tracker_OnProgressChanged()

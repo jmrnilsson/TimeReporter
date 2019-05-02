@@ -9,8 +9,11 @@ namespace Timereporter.Api.Models
 		[Key]
 		[StringLength(25)]
 		public string CursorType { get; set; }
+		[Required]
 		public DateTime Added { get; set; }
+		[Required]
 		public DateTime Changed { get; set; }
+		[Required]
 		public long Position { get; set; }
 	}
 }

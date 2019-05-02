@@ -24,6 +24,25 @@ namespace Timereporter.EventLogTask
 			this.eventLog = eventLog;
 		}
 
+		public IEnumerable<List<Event>> Chunkmap(Dictionary<string, Time> times)
+		{
+			List<Event> events = new List<Event>();
+			
+			foreach(var t in times)
+			{
+				if (events.Count > 998)
+				{
+					yield return events;
+					events.Clear();
+				}
+
+				// TODO: Replace with Some(Action<>) me thinks
+				t.Value.Min.Match(some: min => events.Add(ModelFactory.MakeEvent("esent_min", min)), none: () => { });
+				t.Value.Max.Match(some: max => events.Add(ModelFactory.MakeEvent("esent_max", max)), none: () => { });
+			}
+			yield return events;
+		}
+
 		public Dictionary<string, Time> FindBy(EventLogQuery query)
 		{
 			eventLog.Log = query.LogName;
@@ -51,6 +70,7 @@ namespace Timereporter.EventLogTask
 		{
 			Instant now = SystemClock.Instance.GetCurrentInstant();
 			DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+
 			return
 				from e in entries
 				where Regex.IsMatch(e.Source, pattern)
@@ -72,7 +92,7 @@ namespace Timereporter.EventLogTask
 		{
 			var kvp = minMaxes.ToDictionary(mm => mm.Date, mm => mm);
 
-			foreach (Date date in Workdays.EnumerateDates(from, to))
+			foreach (Date date in Core.Collections.Workdays.EnumerateDates(from, to))
 			{
 				yield return kvp.GetValueOrDefault(date.DateText(), new Time(date, Option.None<Instant>(), Option.None<Instant>()));
 			}

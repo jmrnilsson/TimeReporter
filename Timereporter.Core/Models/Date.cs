@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodaTime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,13 @@ namespace Timereporter.Core.Models
 		}
 
 		public Date(DateTime datetime)
+		{
+			this.year = datetime.Year;
+			this.month = datetime.Month;
+			this.day = datetime.Day;
+			this.date = new DateTime(year, month, day);
+		}
+		public Date(LocalDateTime datetime)
 		{
 			this.year = datetime.Year;
 			this.month = datetime.Month;

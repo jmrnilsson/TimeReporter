@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Timereporter.Api.Collections;
 using Timereporter.Api.Collections.Queries;
 using Timereporter.Core.Models;
+using Events = Timereporter.Core.Models.Events;
 
 namespace Timereporter.Api.Controllers
 {
@@ -27,27 +28,27 @@ namespace Timereporter.Api.Controllers
 		//	return new string[] { "value1", "value2" };
 		//}
 
-		[HttpGet("{year:int}/{month:int}")]
-		public IEnumerable<Event> Find(int year, int month)
+		[HttpGet("{from:long}/{to:long}")]
+		public IEnumerable<Event> Find(long from, long to)
 		{
-			return events.FindBy(new YearMonth(year, month));
+			return events.FindBy((from, to));
 		}
 
-		[HttpGet("{year:int}/{month}/{day:int}")]
-		public IEnumerable<Event> Find(int year, int month, int day)
-		{
-			return events.FindBy(new Date(year, month, day));
-		}
+		//[HttpGet("{year:int}/{month}/{day:int}")]
+		//public IEnumerable<Event> Find(int year, int month, int day)
+		//{
+		//	return events.FindBy(new Date(year, month, day));
+		//}
 
 		/// <summary>
 		/// Moment in UNIX-timestamp. Example:
 		/// curl -k -d "" -X POST https://localhost:44388/api/events/random/1556238242
 		/// </summary>
 		/// <param name="value"></param>
-		[HttpPost("{kind}/{moment:double}")]
-		public void Post(string kind, int moment)
+		[HttpPost]
+		public void Post(Events events_)
 		{
-			events.Add(new Event(kind, moment));
+			events.AddRange(events_.Events_);
 		}
 
 		//// PUT api/values/5

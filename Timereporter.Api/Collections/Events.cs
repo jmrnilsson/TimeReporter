@@ -6,10 +6,12 @@ using Event = Timereporter.Core.Models.Event;
 using System.Collections.Generic;
 using Timereporter.Api.Collections.Interfaces;
 using Timereporter.Core.Models;
+using NodaTime;
+using Optional;
 
 namespace Timereporter.Api.Collections
 {
-	public interface IEvents : IPersistentLog<YearMonth, Date, Event> { }
+	public interface IEvents : IPersistentLog<(Instant, Instant), (long, long), Event> { }
 
 	public class Events : IEvents
 	{
@@ -20,63 +22,67 @@ namespace Timereporter.Api.Collections
 			this.databaseContextFactory = databaseContextFactory;
 		}
 
-		private static void Add(DatabaseContext db, Event @event)
+		private Models.Event MakeAndAdd(DatabaseContext db, string kind, long timestamp)
 		{
-			var model = new Models.Event();
-			model.Added = @event.Added;
-			model.Kind = @event.Kind;
-			model.Moment = @event.Moment;
-			db.Events.Add(model);
-		}
-
-		public void Add(Event @event)
-		{
-			using (DatabaseContext db = databaseContextFactory())
+			var c = new Models.Event()
 			{
-				Add(db, @event);
-				db.SaveChanges();
-			}
+				Added = DateTime.UtcNow,
+				Changed = DateTime.UtcNow,
+				Kind = kind,  // Because composite keys, dunno
+				Timestamp = timestamp
+			};
+			db.Add(c);
+			return c;
 		}
 
-		public void Add(IEnumerable<Event> events)
+		public void AddRange(IEnumerable<Event> events)
 		{
 			using (DatabaseContext db = databaseContextFactory())
 			{
 				foreach(var e in events)
 				{
-					Add(db, e);
-				}
+					var option = db.Events.SingleOrDefault(c => c.Kind == e.Kind && c.Timestamp == e.Timestamp).SomeNotNull();
+					var model = option.ValueOr(() => MakeAndAdd(db, e.Kind, e.Timestamp));
+					model.Kind = e.Kind;
+					model.Timestamp = e.Timestamp;
+					model.Changed = DateTime.UtcNow;
+				};
+
 				db.SaveChanges();
 			}
 		}
 
-		public Event[] FindBy(Date query)
+		//public Event[] FindBy(Date query, DateTimeZone timeZone)
+		//{
+		//	var start = query.ToDateTime();
+		//	var exclusiveEnd = start.AddDays(1);
+		//	return FindBy(start, exclusiveEnd);
+		//}
+
+		//public Event[] FindBy(YearMonth query)
+		//{
+		//	int year, month;
+		//	year = query.Year;
+		//	month = query.Month;
+		//	var end = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+		//	var exclusiveEnd = end.AddDays(1);
+		//	return FindBy(start, exclusiveEnd);
+		//}
+
+		public Event[] FindBy((Instant, Instant) args)
 		{
-			var start = query.ToDateTime();
-			var exclusiveEnd = start.AddDays(1);
-			return FindBy(start, exclusiveEnd);
+			return FindBy((args.Item1.ToUnixTimeMilliseconds(), args.Item2.ToUnixTimeMilliseconds()));
 		}
 
-		public Event[] FindBy(YearMonth query)
-		{
-			int year, month;
-			year = query.Year;
-			month = query.Month;
-			var start = new DateTime(year, month, 1);
-			var end = new DateTime(year, month, DateTime.DaysInMonth(year, month));
-			var exclusiveEnd = end.AddDays(1);
-			return FindBy(start, exclusiveEnd);
-		}
-
-		private Event[] FindBy(DateTime start, DateTime exclusiveEnd)
+		public Event[] FindBy((long, long) args)
 		{
 			using (DatabaseContext db = databaseContextFactory())
 			{
 				var query =
 					from e in db.Events
-					where e.Moment >= start
-					where e.Moment < exclusiveEnd
-					select new Event(e.Added, e.Kind, e.Moment);
+					where e.Timestamp >= args.Item1
+					where e.Timestamp < args.Item2
+					select ModelFactory.MakeEvent(e.Kind, e.Timestamp);
 
 				return query.ToArray();
 			}

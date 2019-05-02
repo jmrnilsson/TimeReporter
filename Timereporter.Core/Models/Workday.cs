@@ -6,6 +6,7 @@ using Timereporter.Core.Models;
 namespace Timereporter.Core.Models
 {
 
+
 	public class Workday : IWorkday
 	{
 		private readonly Date date;

@@ -37,6 +37,7 @@ namespace Timereporter.Api
 			services.AddSingleton<DatabaseContextFactoryDelegate>(DatabaseContextFactory);
 			services.AddScoped<ICursors, Cursors>();
 			services.AddScoped<IEvents, Events>();
+			services.AddScoped<Workdays>();
 		}
 
 		private static DatabaseContext DatabaseContextFactory()
