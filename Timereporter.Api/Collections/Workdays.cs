@@ -46,9 +46,9 @@ namespace Timereporter.Api.Collections
 						select new WorkdayDto
 						{
 							Date = eg.Key.DateText(),
-							ArrivalHours = min != null ? min_.Hour + min_.Minute / 60 + min_.Second / 360 : 0,
+							ArrivalHours = min != null ? (float) min_.Hour + (float) min_.Minute / (float) 60 + (float) min_.Second / (float) 360 : 0,
 							BreakHours = 0,
-							DepartureHours = max != null ? max_.Hour + max_.Minute / 60 + max_.Second / 360 : 0
+							DepartureHours = max != null ? (float) max_.Hour + (float) max_.Minute / (float) 60 + (float)max_.Second / (float) 360 : 0
 						}
 					).ToList()
 				};

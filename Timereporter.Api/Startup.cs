@@ -19,7 +19,8 @@ namespace Timereporter.Api
 	public delegate DatabaseContext DatabaseContextFactoryDelegate();
 	public class Startup
 	{
-		const string conn = @"Server=localhost\SQLEXPRESS;Database=Timereporter;Trusted_Connection=True;";
+		const string conn = @"Data Source=DESKTOP-0G9PV2L;Initial Catalog=Timereporter;Integrated Security=True";
+		// const string conn = @"Server=localhost\SQLEXPRESS;Database=Timereporter;Trusted_Connection=True;";
 
 		public Startup(IConfiguration configuration)
 		{
