@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NodaTime;
-using Timereporter.Core.Models;
+using Timereporter.Core;
 
 namespace Timereporter.Api.Controllers
 {
@@ -32,7 +32,7 @@ namespace Timereporter.Api.Controllers
 			var fromLocalDate = tz.AtStartOfDay(new LocalDate(year, month, 1));
 			var exclusiveToLocalDate = tz.AtStartOfDay(new LocalDate(year, month, DateTime.DaysInMonth(year, month)).PlusDays(1));
 			var wd = workdays.Find(fromLocalDate.ToInstant(), exclusiveToLocalDate.ToInstant());
-			return Ok(wd);
+			return Ok(Extensions.ToWorkdays(wd, tz));
 		}
 	}
 }

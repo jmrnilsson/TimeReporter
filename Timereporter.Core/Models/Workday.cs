@@ -15,6 +15,11 @@ namespace Timereporter.Core.Models
 		private int departure;
 		private IList<Workday> otherDays;
 
+		public Workday()
+		{
+
+		}
+
 		public Workday(Date date, int arrival, int @break, int departure)
 		{
 			this.date = date;

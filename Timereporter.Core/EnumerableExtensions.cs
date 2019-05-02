@@ -24,26 +24,63 @@ namespace Timereporter.Core
 			return list;
 		}
 
-		public static Workdays ToWorkdays(this DateTimeZone timeZone, IQueryable<Event> events)
+		public static Workdays ToWorkdays(this List<Event> events, DateTimeZone timeZone)
 		{
+			var reduced =
+				from e in events
+				group e by new { Date = new Date(DoubleExtensions.ToLocalDateTimestampMilliseconds(e.Timestamp)), e.Kind } into eg
+				select new
+				{
+					eg.Key.Date,
+					eg.Key.Kind,
+					EsentArrival = eg.FirstOrDefault(e => e.Kind == "ESENT_MIN").SomeNotNull(),
+					EsentDepature = eg.FirstOrDefault(e => e.Kind == "ESENT_MAX").SomeNotNull(),
+					OtherArrival = eg.FirstOrDefault(e => e.Kind == "OTHEREVENT_MIN").SomeNotNull(),
+					OtherDepature = eg.FirstOrDefault(e => e.Kind == "OTHEREVENT_MAX").SomeNotNull()
+
+					// Should really be singles
+				};
+
+			Option<float> RoundHours(Option<long> unixTimestamp)
+			{
+				var hours = Option.None<float>();
+				unixTimestamp.MatchSome(ts =>
+				{
+					var value = ts.ToInstantFromUnixTimestampMilliseconds().InZone(timeZone).LocalDateTime.TimeOfDay;
+					var roundedHours = (float) value.Hour + (float)value.Minute / (float)60 + (float)value.Second / (float)3600 + (float)value.Millisecond / (float)360000;
+					hours = roundedHours.Some();
+				});
+				return hours;
+
+			}
+			
+			IEnumerable<WorkdayDto> Rereduce()
+			{
+				foreach (var r in reduced)
+				{
+					//Workday workday = new Workday();
+					//workday.DateText = r.Date.DateText;
+					Option<long> arrival = Option.None<long>();
+					Option<long> departure = Option.None<long>();
+
+					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = a.Timestamp.Some()));
+					arrival.MatchNone(() => r.OtherArrival.MatchSome(a => arrival = a.Timestamp.Some()));
+					departure.MatchNone(() => r.EsentArrival.MatchSome(a => departure = a.Timestamp.Some()));
+					departure.MatchNone(() => r.OtherArrival.MatchSome(a => departure = a.Timestamp.Some()));
+
+					yield return new WorkdayDto
+					{
+						Date = r.Date.DateText(),
+						ArrivalHours = RoundHours(arrival).ValueOr(0),
+						BreakHours = 0,
+						DepartureHours = RoundHours(departure).ValueOr(0),
+					};
+				}
+			}
+
 			return new Workdays
 			{
-				List =
-				(
-					from e in events
-					group e by new Date(DoubleExtensions.ToLocalDateTimestampMilliseconds(e.Timestamp)) into eg
-					let min = eg.FirstOrDefault(e => e.Kind == "esent_min")
-					let min_ = min.Timestamp.ToInstantFromUnixTimestampMilliseconds().InZone(timeZone).LocalDateTime.TimeOfDay
-					let max = eg.FirstOrDefault(e => e.Kind == "esent_max")
-					let max_ = max.Timestamp.ToInstantFromUnixTimestampMilliseconds().InZone(timeZone).LocalDateTime.TimeOfDay
-					select new WorkdayDto
-					{
-						Date = eg.Key.DateText(),
-						ArrivalHours = min != null ? (float)min_.Hour + (float)min_.Minute / (float)60 + (float)min_.Second / (float)360 : 0,
-						BreakHours = 0,
-						DepartureHours = max != null ? (float)max_.Hour + (float)max_.Minute / (float)60 + (float)max_.Second / (float)360 : 0
-					}
-				).ToList()
+				List = Rereduce().ToList()
 			};
 		}
 
