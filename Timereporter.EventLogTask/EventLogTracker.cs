@@ -47,7 +47,7 @@ namespace Timereporter.EventLogTask
 			}
 		}
 
-		private IEnumerable<Time> Summarize(List<IEventLogEntryProxy> entries, Date from, Date to, string pattern)
+		private IEnumerable<Time> Summarize(List<IEventLogEntryProxy> entries, Date fromDate, Date toDate, string pattern)
 		{
 			Instant now = SystemClock.Instance.GetCurrentInstant();
 			DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
@@ -56,13 +56,14 @@ namespace Timereporter.EventLogTask
 				from e in entries
 				where Regex.IsMatch(e.Source, pattern)
 				orderby e.TimeWritten ascending
-				group e by new Date(e.TimeWritten) into eg
-				where !eg.Key.IsWeekend()
-				where eg.Key >= @from
-				where eg.Key <= to
+				group e by new { Date = new Date(e.TimeWritten), e.Source } into eg
+				where !eg.Key.Date.IsWeekend()
+				where eg.Key.Date >= fromDate
+				where eg.Key.Date <= toDate
 				select new Time
 				(
-					eg.Key,
+					eg.Key.Date,
+					eg.Key.Source,
 					eg.Min(e => e.TimeWritten),
 					eg.Max(e => e.TimeWritten),
 					tz
@@ -75,7 +76,7 @@ namespace Timereporter.EventLogTask
 
 			foreach (Date date in Extensions.DateRange(from, to))
 			{
-				yield return kvp.GetValueOrDefault(date.DateText(), new Time(date, Option.None<Instant>(), Option.None<Instant>()));
+				yield return kvp.GetValueOrDefault(date.DateText(), new Time(date, Option.None<string>(), Option.None<Instant>(), Option.None<Instant>()));
 			}
 		}
 	}

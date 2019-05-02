@@ -47,7 +47,7 @@ namespace Timereporter.Core
 			};
 		}
 
-		public static IEnumerable<List<Event>> Chunkmap(this Dictionary<string, Time> times, string source)
+		public static IEnumerable<List<Event>> Chunkmap(this Dictionary<string, Time> times)
 		{
 			List<Event> events = new List<Event>();
 
@@ -60,11 +60,15 @@ namespace Timereporter.Core
 				}
 
 				// TODO: Replace with Some(Action<>) me thinks
-				t.Value.Min.Match(some: min => events.Add(ModelFactory.MakeEvent($"{source}_min", min)), none: () => { });
-				t.Value.Max.Match(some: max => events.Add(ModelFactory.MakeEvent($"{source}_max", max)), none: () => { });
+				t.Value.Source.MatchSome(source =>
+				{
+					t.Value.Min.MatchSome(some: min => events.Add(new Event($"{source}_MIN", min)));
+					t.Value.Max.MatchSome(some: max => events.Add(new Event($"{source}_MAX", max)));
+				});
 			}
 			yield return events;
 		}
+
 
 		public static IWorkday[] WorkdayRange(int year, int month)
 		{

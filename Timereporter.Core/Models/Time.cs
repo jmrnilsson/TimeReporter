@@ -10,6 +10,7 @@ namespace Timereporter.Core.Models
 	public class Time
 	{
 		private readonly Date date;
+		private readonly Option<string> source;
 		private readonly Option<Instant> min;
 		private readonly Option<Instant> max;
 
@@ -17,10 +18,12 @@ namespace Timereporter.Core.Models
 		public Option<Instant> Max => date.IsWeekend() ? Option.None<Instant>() : max;
 		public string Date => date.ToString();
 		public string DayOfWeek => date.DayOfWeek();
+		public Option<string> Source => source;
 
-		public Time(Date date, DateTime min, DateTime max, DateTimeZone timeZone = null)
+		public Time(Date date, string source, DateTime min, DateTime max, DateTimeZone timeZone = null)
 		{
 			this.date = date;
+			this.source = source.Some();
 			if (timeZone != null)
 			{
 				this.min = ToInstantFromLocal(min, timeZone, assert: true).Some();
@@ -40,9 +43,10 @@ namespace Timereporter.Core.Models
 			}
 		}
 
-		public Time(Date date, Option<Instant> min, Option<Instant> max)
+		public Time(Date date, Option<string> source, Option<Instant> min, Option<Instant> max)
 		{
 			this.date = date;
+			this.source = source;
 			this.min = min;
 			this.max = max;
 		}

@@ -29,7 +29,7 @@ namespace Timereporter.Api.Collections
 					from e in db.Events
 					where e.Timestamp >= fromDate.ToUnixTimeMilliseconds()
 					where e.Timestamp < exclusiveToDate.ToUnixTimeMilliseconds()
-					select ModelFactory.MakeEvent(e.Kind, e.Timestamp);
+					select new Event(e.Kind, e.Timestamp);
 
 				return events.ToList();
 			}

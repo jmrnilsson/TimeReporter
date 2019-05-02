@@ -1,28 +1,18 @@
-﻿using NodaTime;
-using System;
+﻿//using NodaTime;
+//using System;
 
-namespace Timereporter.Core.Models
-{
-	public static class ModelFactory
-	{
-		public static Event MakeEvent(string kind, Instant instant)
-		{
-			return new Event
-			{
-				Kind = kind ?? throw new ArgumentException(nameof(kind)),
-				Timestamp = instant.ToUnixTimeMilliseconds()
-			};
-		}
+//namespace Timereporter.Core.Models
+//{
+//	public static class ModelFactory
+//	{
+//		public static Event MakeEvent
+//		{
+//			return new 
+//		}
 
 
-		public static Event MakeEvent(string kind, long timestamp)
-		{
-			return new Event
-			{
-				Kind = kind ?? throw new ArgumentException(nameof(kind)),
-				Timestamp = timestamp
-			};
-		}
-	}
-}
+//		public static Event 
+//		}
+//	}
+//}
 

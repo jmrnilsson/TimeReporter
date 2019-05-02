@@ -18,25 +18,12 @@ using System.Net.Http.Headers;
 
 namespace Timereporter.EventLogTask
 {
-	class Program
+
+	public static class ApiClient
 	{
-		private static Lazy<Container> container = new Lazy<Container>(() => new Container());
-
-		static void Main(string[] args)
+		public static void PostEvents(Dictionary<string, Time> times)
 		{
-			RegisterServices(container.Value);
-
-			var tracker = container.Value.GetInstance<EventLogTracker>();
-			tracker.OnProgressChanged += Tracker_OnProgressChanged;
-			var dateTimeValueFactory = container.Value.GetInstance<IDateTimeValueFactory>();
-			Date from = WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
-			Date to = dateTimeValueFactory.LocalToday();
-			var minMaxes = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", from, to, fill: true));
-			var chunks = minMaxes.Chunkmap("ESENT").ToList();
-
-			Console.WriteLine("done!\r\n");
-			Console.WriteLine(PrintConsoleTable(minMaxes));
-			Console.WriteLine("Synchronizing results..");
+			var chunks = times.Chunkmap().ToList();
 
 			using (var client = new HttpClient())
 			{
@@ -48,10 +35,6 @@ namespace Timereporter.EventLogTask
 					Post(client, chunk);
 				}
 			}
-
-			Console.WriteLine("done!\r\n");
-			Console.WriteLine("Press any key to close.");
-			Console.ReadKey();
 		}
 
 		private static void Post(HttpClient client, List<Event> events)
@@ -68,11 +51,35 @@ namespace Timereporter.EventLogTask
 			{
 				throw new ApplicationException("esent rest");
 			}
-
-			Console.Write("Post");
-
-			Tracker_OnProgressChanged();
 		}
+	}
+
+	class Program
+	{
+		private static Lazy<Container> container = new Lazy<Container>(() => new Container());
+
+		static void Main(string[] args)
+		{
+			RegisterServices(container.Value);
+
+			var tracker = container.Value.GetInstance<EventLogTracker>();
+			tracker.OnProgressChanged += Tracker_OnProgressChanged;
+			var dateTimeValueFactory = container.Value.GetInstance<IDateTimeValueFactory>();
+			Date from = WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
+			Date to = dateTimeValueFactory.LocalToday();
+			Dictionary<string, Time> minMaxes = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", from, to, fill: true));
+
+
+			Console.WriteLine("done!\r\n");
+			Console.WriteLine(PrintConsoleTable(minMaxes));
+			Console.WriteLine("Synchronizing results..");
+			ApiClient.PostEvents(minMaxes);
+			Console.WriteLine("done!\r\n");
+			Console.WriteLine("Press any key to close.");
+			Console.ReadKey();
+		}
+
+
 
 		private static void Tracker_OnProgressChanged()
 		{

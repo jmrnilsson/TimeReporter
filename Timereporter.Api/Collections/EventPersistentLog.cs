@@ -3,7 +3,6 @@ using System.Linq;
 using Timereporter.Api.Models;
 using Event = Timereporter.Core.Models.Event;
 using System.Collections.Generic;
-using Timereporter.Core.Models;
 using NodaTime;
 using Optional;
 
@@ -76,7 +75,7 @@ namespace Timereporter.Api.Collections
 					from e in db.Events
 					where e.Timestamp >= args.Item1
 					where e.Timestamp < args.Item2
-					select ModelFactory.MakeEvent(e.Kind, e.Timestamp);
+					select new Event(e.Kind, e.Timestamp);
 
 				return query.ToArray();
 			}
