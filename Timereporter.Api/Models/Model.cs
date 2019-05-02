@@ -10,14 +10,14 @@ namespace Timereporter.Api.Models
 			: base(options)
 		{ }
 
-		public DbSet<Event> Events { get; set; }
-		public DbSet<Workday> Workdays { get; set; }
-		public DbSet<WorkdayComment> WorkdayComments { get; set; }
-		public DbSet<Cursor> Cursors { get; set; }
+		public DbSet<EventDo> Events { get; set; }
+		public DbSet<WorkdayDo> Workdays { get; set; }
+		public DbSet<WorkdayCommentDo> WorkdayComments { get; set; }
+		public DbSet<CursorDo> Cursors { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<Event>()
+			modelBuilder.Entity<EventDo>()
 				.HasKey(c => new { c.Timestamp, c.Kind });
 		}
 	}

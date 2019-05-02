@@ -3,26 +3,24 @@ using System.Linq;
 using Optional;
 using Timereporter.Api.Models;
 using Cursor = Timereporter.Core.Models.Cursor;
-using Timereporter.Api.Collections.Interfaces;
 
 namespace Timereporter.Api.Collections
 {
-	public interface ICursors : IRepository<Cursor, string> { }
 
-	public class Cursors : ICursors
+	public class CursorRepository : ICursorRepository
 	{
 		private readonly DatabaseContextFactoryDelegate dataContextFactory;
 
-		public Cursors(DatabaseContextFactoryDelegate dataContextFactory)
+		public CursorRepository(DatabaseContextFactoryDelegate dataContextFactory)
 		{
 			this.dataContextFactory = dataContextFactory;
 		}
 
 		public void Save(Cursor cursor)
 		{
-			Models.Cursor Create(DatabaseContext db)
+			Models.CursorDo Create(DatabaseContext db)
 			{
-				var c = new Models.Cursor() { Added = cursor.Changed };
+				var c = new Models.CursorDo() { Added = cursor.Changed };
 				db.Add(c);
 				return c;
 			}

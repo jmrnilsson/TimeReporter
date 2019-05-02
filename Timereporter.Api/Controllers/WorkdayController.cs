@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NodaTime;
 using Timereporter.Core.Models;
 
 namespace Timereporter.Api.Controllers
@@ -27,7 +28,10 @@ namespace Timereporter.Api.Controllers
 		[HttpGet("{year:int}/{month:int}")]
 		public IActionResult Get(int year, int month)
 		{
-			var wd = workdays.Find(new Date(year, month, 1), new Date(year, month, DateTime.DaysInMonth(year, month)));
+			var tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+			var fromLocalDate = tz.AtStartOfDay(new LocalDate(year, month, 1));
+			var exclusiveToLocalDate = tz.AtStartOfDay(new LocalDate(year, month, DateTime.DaysInMonth(year, month)).PlusDays(1));
+			var wd = workdays.Find(fromLocalDate.ToInstant(), exclusiveToLocalDate.ToInstant());
 			return Ok(wd);
 		}
 	}

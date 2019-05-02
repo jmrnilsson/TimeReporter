@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Timereporter.Api.Collections.Interfaces
+namespace Timereporter.Api.Collections
 {
 	public interface IPersistentLog<TArg, TArg0, TArg1, TArg2, T>
 	{

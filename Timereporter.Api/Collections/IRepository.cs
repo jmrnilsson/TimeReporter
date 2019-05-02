@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Optional;
 
-namespace Timereporter.Api.Collections.Interfaces
+namespace Timereporter.Api.Collections
 {
 	public interface IRepository<T, TKey>
 	{

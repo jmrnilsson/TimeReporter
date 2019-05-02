@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Timereporter.Api.Models
 {
-	public class Cursor
+	[Table("Cursors")]
+	public class CursorDo
 	{
 		// https://docs.microsoft.com/en-us/ef/core/modeling/keys
 		[Key]

@@ -75,7 +75,7 @@ namespace Timereporter
 				}
 				var json = response.Content.ReadAsStringAsync().Result;
 				var wd = JsonConvert.DeserializeObject<Core.Models.Workdays>(json);
-				return wd.Workdays_;
+				return wd.List;
 			}
 		}
 	}

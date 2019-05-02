@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Timereporter.Api.Models
 {
-	public class Event
+	[Table("Events")]
+	public class EventDo
 	{
 		public string Kind { get; set; }
 		public long Timestamp { get; set; }

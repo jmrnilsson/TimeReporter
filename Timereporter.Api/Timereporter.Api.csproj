@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="CoreTasks\EventLogReader\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

@@ -1,38 +1,21 @@
 ﻿using System;
 using System.Linq;
 using Timereporter.Api.Models;
-using Timereporter.Api.Collections.Queries;
 using Event = Timereporter.Core.Models.Event;
 using System.Collections.Generic;
-using Timereporter.Api.Collections.Interfaces;
 using Timereporter.Core.Models;
 using NodaTime;
 using Optional;
 
 namespace Timereporter.Api.Collections
 {
-	public interface IEvents : IPersistentLog<(Instant, Instant), (long, long), Event> { }
-
-	public class Events : IEvents
+	public class EventPersistentLog : IEventLog
 	{
 		private readonly DatabaseContextFactoryDelegate databaseContextFactory;
 
-		public Events(DatabaseContextFactoryDelegate databaseContextFactory)
+		public EventPersistentLog(DatabaseContextFactoryDelegate databaseContextFactory)
 		{
 			this.databaseContextFactory = databaseContextFactory;
-		}
-
-		private Models.Event MakeAndAdd(DatabaseContext db, string kind, long timestamp)
-		{
-			var c = new Models.Event()
-			{
-				Added = DateTime.UtcNow,
-				Changed = DateTime.UtcNow,
-				Kind = kind,  // Because composite keys, dunno
-				Timestamp = timestamp
-			};
-			db.Add(c);
-			return c;
 		}
 
 		public void AddRange(IEnumerable<Event> events)
@@ -42,14 +25,25 @@ namespace Timereporter.Api.Collections
 				foreach(var e in events)
 				{
 					var option = db.Events.SingleOrDefault(c => c.Kind == e.Kind && c.Timestamp == e.Timestamp).SomeNotNull();
-					var model = option.ValueOr(() => MakeAndAdd(db, e.Kind, e.Timestamp));
-					model.Kind = e.Kind;
-					model.Timestamp = e.Timestamp;
+					var model = option.ValueOr(() => Make(db, e.Kind, e.Timestamp));
 					model.Changed = DateTime.UtcNow;
 				};
 
 				db.SaveChanges();
 			}
+		}
+
+		private static EventDo Make(DatabaseContext db, string kind, long timestamp)
+		{
+			var c = new Models.EventDo()
+			{
+				Added = DateTime.UtcNow,
+				Changed = DateTime.UtcNow,
+				Kind = kind,  // Because composite keys, dunno
+				Timestamp = timestamp
+			};
+			db.Add(c);
+			return c;
 		}
 
 		//public Event[] FindBy(Date query, DateTimeZone timeZone)

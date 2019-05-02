@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Timereporter.Api.Collections;
-using Timereporter.Api.Collections.Queries;
 using Timereporter.Core.Models;
 using Events = Timereporter.Core.Models.Events;
 
@@ -14,9 +11,9 @@ namespace Timereporter.Api.Controllers
 	[ApiController]
 	public class EventsController : ControllerBase
 	{
-		private readonly IEvents events;
+		private readonly IEventLog events;
 
-		public EventsController(IEvents events)
+		public EventsController(IEventLog events)
 		{
 			this.events = events;
 		}

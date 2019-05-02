@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Timereporter.Api.Models
 {
-	public class Workday
+	[Table("Workdays")]
+	public class WorkdayDo
 	{
 		[Key]
 		[StringLength(8)]

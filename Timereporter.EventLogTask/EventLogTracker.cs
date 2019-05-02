@@ -24,30 +24,11 @@ namespace Timereporter.EventLogTask
 			this.eventLog = eventLog;
 		}
 
-		public IEnumerable<List<Event>> Chunkmap(Dictionary<string, Time> times)
-		{
-			List<Event> events = new List<Event>();
-			
-			foreach(var t in times)
-			{
-				if (events.Count > 998)
-				{
-					yield return events;
-					events.Clear();
-				}
-
-				// TODO: Replace with Some(Action<>) me thinks
-				t.Value.Min.Match(some: min => events.Add(ModelFactory.MakeEvent("esent_min", min)), none: () => { });
-				t.Value.Max.Match(some: max => events.Add(ModelFactory.MakeEvent("esent_max", max)), none: () => { });
-			}
-			yield return events;
-		}
-
 		public Dictionary<string, Time> FindBy(EventLogQuery query)
 		{
 			eventLog.Log = query.LogName;
 
-			var entries = eventLog.Entries.ToListAndTap(ReportProgress, e => Regex.IsMatch(e.Source, query.Pattern));
+			var entries = eventLog.Entries.ToList(ReportProgress, e => Regex.IsMatch(e.Source, query.Pattern));
 			var summary = Summarize(entries, query.From, query.To, query.Pattern);
 
 			if (query.Fill)
@@ -88,11 +69,11 @@ namespace Timereporter.EventLogTask
 				);
 		}
 
-		IEnumerable<Time> Fill(IEnumerable<Time> minMaxes, Date from, Date to)
+		private IEnumerable<Time> Fill(IEnumerable<Time> minMaxList, Date from, Date to)
 		{
-			var kvp = minMaxes.ToDictionary(mm => mm.Date, mm => mm);
+			var kvp = minMaxList.ToDictionary(mm => mm.Date, mm => mm);
 
-			foreach (Date date in Core.Collections.Workdays.EnumerateDates(from, to))
+			foreach (Date date in Extensions.DateRange(from, to))
 			{
 				yield return kvp.GetValueOrDefault(date.DateText(), new Time(date, Option.None<Instant>(), Option.None<Instant>()));
 			}

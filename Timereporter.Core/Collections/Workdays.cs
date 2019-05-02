@@ -17,44 +17,9 @@ namespace Timereporter.Core.Collections
 
 		public Workdays(int year, int month)
 		{
-			workdays = EnumerateWorkdays(year, month);
+			workdays = Extensions.WorkdayRange(year, month);
 		}
 			   
-		private IWorkday[] EnumerateWorkdays(int year, int month)
-		{
-			DateTime start, end;
-			{
-				var daysInMonth = DateTime.DaysInMonth(year, month);
-				start = new DateTime(year, month, 1);
-				end = new DateTime(year, month, daysInMonth);
-			}
-
-			IEnumerable<Workday> EnumerateWorkdays_()
-			{
-				for (int i = 0; start.AddDays(i) < end.AddDays(1); i++)
-				{
-					var date = start.AddDays(i);
-					yield return new Workday(new Date(date), 0, 0, 0);
-				}
-			}
-
-			return EnumerateWorkdays_().ToArray();
-		}
-
-		public static Date[] EnumerateDates(Date from, Date to)
-		{
-			IEnumerable<Date> EnumerateDates_()
-			{
-				for (int i = 0; from.With(i) < to.With(1); i++)
-				{
-					var date = from.With(i);
-					yield return new Date(date);
-				}
-			}
-
-			return EnumerateDates_().ToArray();
-		}
-
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return GetEnumerator();

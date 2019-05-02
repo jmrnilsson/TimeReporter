@@ -21,7 +21,6 @@ namespace Timereporter.Core.Models
 		public Time(Date date, DateTime min, DateTime max, DateTimeZone timeZone = null)
 		{
 			this.date = date;
-
 			if (timeZone != null)
 			{
 				this.min = ToInstantFromLocal(min, timeZone, assert: true).Some();

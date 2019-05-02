@@ -13,9 +13,9 @@ namespace Timereporter.Api.Controllers
 	[ApiController]
 	public class CursorsController : ControllerBase
 	{
-		private readonly ICursors cursors;
+		private readonly ICursorRepository cursors;
 
-		public CursorsController(ICursors cursors)
+		public CursorsController(ICursorRepository cursors)
 		{
 			this.cursors = cursors;
 		}

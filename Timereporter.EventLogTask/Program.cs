@@ -32,7 +32,7 @@ namespace Timereporter.EventLogTask
 			Date from = WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
 			Date to = dateTimeValueFactory.LocalToday();
 			var minMaxes = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", from, to, fill: true));
-			var chunks = tracker.Chunkmap(minMaxes).ToList();
+			var chunks = minMaxes.Chunkmap("ESENT").ToList();
 
 			Console.WriteLine("done!\r\n");
 			Console.WriteLine(PrintConsoleTable(minMaxes));
