@@ -9,6 +9,14 @@ using Timereporter.Core.Models;
 
 namespace Timereporter.Core
 {
+	public enum TimeConfidence : short
+	{
+		Certain = 1,
+		Confident,
+		Insecure,
+		None
+	}
+
 	public static class Extensions
 	{
 		public static List<T> ToList<T>(this IEnumerable<T> iterable, Action<int, T> tap, Predicate<T> filter = null)
@@ -61,36 +69,43 @@ namespace Timereporter.Core
 					// Should really be partitioned by localDate of the clients timezone.
 				};
 
-			Option<float> RoundHours(Option<long> unixTimestamp)
+			Option<float> RoundHours(Option<(long, TimeConfidence)> unixTimestamp)
 			{
 				var hours = Option.None<float>();
 				unixTimestamp.MatchSome(ts =>
 				{
-					var value = ts.ToInstantFromUnixTimestampMilliseconds().InZone(timeZone).LocalDateTime.TimeOfDay;
+					var value = ts.Item1.ToInstantFromUnixTimestampMilliseconds().InZone(timeZone).LocalDateTime.TimeOfDay;
 					var roundedHours = (float) value.Hour + (float)value.Minute / (float)60 + (float)value.Second / (float)3600 + (float)value.Millisecond / (float)360000;
 					hours = roundedHours.Some();
 				});
 				return hours;
+			}
 
+			string ConfidenceText(Option<(long, TimeConfidence)> unixTimestamp)
+			{
+				return unixTimestamp.ValueOr((0, TimeConfidence.None)).Item2.ToString();
 			}
 			
 			IEnumerable<WorkdayDto> RereduceTime()
 			{
 				foreach (var r in reduceDate)
 				{
-					Option<long> arrival = Option.None<long>();
-					Option<long> departure = Option.None<long>();
-					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = a.Some()));
-					arrival.MatchNone(() => r.OtherArrival.MatchSome(a => arrival = a.Some()));
-					departure.MatchNone(() => r.EsentDepature.MatchSome(a => departure = a.Some()));
-					departure.MatchNone(() => r.OtherDepature.MatchSome(a => departure = a.Some()));
+					Option<(long, TimeConfidence)> arrival = Option.None<(long, TimeConfidence)>();
+					Option<(long, TimeConfidence)> departure = Option.None<(long, TimeConfidence)>();
+
+					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = (a, TimeConfidence.Confident) .Some()));
+					arrival.MatchNone(() => r.OtherArrival.MatchSome(a => arrival = (a, TimeConfidence.Insecure).Some()));
+					departure.MatchNone(() => r.EsentDepature.MatchSome(a => departure = (a, TimeConfidence.Confident).Some()));
+					departure.MatchNone(() => r.OtherDepature.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()));
 
 					yield return new WorkdayDto
 					{
 						Date = r.Date.DateText(),
 						ArrivalHours = RoundHours(arrival).ValueOr(0),
+						ArrivalConfidence = ConfidenceText(arrival),
 						BreakHours = 0,
 						DepartureHours = RoundHours(departure).ValueOr(0),
+						DepartureConfidence = ConfidenceText(departure)
 					};
 				}
 			}

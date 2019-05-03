@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using System.Text;
+using Timereporter.Core;
 
 namespace Timereporter
 {
@@ -19,6 +20,7 @@ namespace Timereporter
 			dgv.Rows.Clear();
 
 			Color lgray = Color.FromArgb(255, 240, 240, 240);
+			Color lred = Color.FromArgb(255, 255, 244, 244);
 
 			DateTime chosenMonth;
 			{
@@ -44,6 +46,22 @@ namespace Timereporter
 						workKvp[wd.DateText].DepartureHours.ToString("0.0")
 					);
 
+					if (Enum.TryParse<TimeConfidence>(workKvp[wd.DateText].ArrivalConfidence, out TimeConfidence arrivalConfidence))
+					{
+						if (arrivalConfidence == TimeConfidence.Confident)
+						{
+							dgv.Rows[i].Cells[2].Style.BackColor = lred;
+						}
+					}
+
+					if (Enum.TryParse<TimeConfidence>(workKvp[wd.DateText].DepartureConfidence, out TimeConfidence departureConfidence))
+					{
+						if (departureConfidence == TimeConfidence.Confident)
+						{
+							dgv.Rows[i].Cells[4].Style.BackColor = lred;
+						}
+					}
+
 				}
 				else
 				{
@@ -58,6 +76,7 @@ namespace Timereporter
 				{
 					dgv.Rows[i].DefaultCellStyle.BackColor = lgray;
 				}
+
 				//dgv.Rows[i].Cells[0].Value = wd.Date;
 				//dgv.Rows[i].Cells[1].Value = wd.DayOfWeek;
 			}
