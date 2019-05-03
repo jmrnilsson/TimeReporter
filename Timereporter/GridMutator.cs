@@ -19,23 +19,29 @@ namespace Timereporter
 			dgv.Rows.Clear();
 
 			Color lgray = Color.FromArgb(255, 240, 240, 240);
-			var now = DateTime.Now;
-			var workdays = WorkdayHelper.Range(now.Year, now.Month);
-			var workdayKvp = GetData(now.Year, now.Month).ToDictionary(wd => wd.Date);
+
+			DateTime chosenMonth;
+			{
+				var now = DateTime.Now;
+				chosenMonth = now.AddDays(0 - now.Day - 1);
+			}
+			var workdays = WorkdayHelper.Range(chosenMonth.Year, chosenMonth.Month);
+			var workdayKvp = GetData(chosenMonth.Year, chosenMonth.Month);
+			var workKvp = workdayKvp.ToDictionary(wd => wd.Date);
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
 			for (int i = 0; i < workdays.Count; i++)
 			{
 				IWorkday wd = workdays[i];
-				if (workdayKvp.ContainsKey(wd.DateText) && !wd.IsWeekend())
+				if (workKvp.ContainsKey(wd.DateText) && !wd.IsWeekend())
 				{
 					dgv.Rows.Add
 					(
 						wd.DateText,
 						wd.DayOfWeekText,
-						workdayKvp[wd.DateText].ArrivalHours.ToString(),
-						workdayKvp[wd.DateText].BreakHours.ToString(),
-						workdayKvp[wd.DateText].DepartureHours.ToString()
+						workKvp[wd.DateText].ArrivalHours.ToString("0.0"),
+						workKvp[wd.DateText].BreakHours.ToString("0.0"),
+						workKvp[wd.DateText].DepartureHours.ToString("0.0")
 					);
 
 				}

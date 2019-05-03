@@ -3,6 +3,7 @@ using Optional;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using Timereporter.Core.Models;
 
@@ -26,19 +27,38 @@ namespace Timereporter.Core
 
 		public static Workdays ToWorkdays(this List<Event> events, DateTimeZone timeZone)
 		{
-			var reduced =
+			Option<long> ReduceTime(IGrouping<Date, Event> grouping, string kind, Func<IEnumerable<long>, long> accumulator)
+			{
+				Option<long> time = Option.None<long>();
+
+				grouping
+					.Where(g => g.Kind == kind)
+					.Select(g => g.Timestamp)
+					.SomeWhen(e => e.Any())
+					.MatchSome(some: g => time = accumulator(g).Some());
+
+				return time;
+			}
+
+			var reduceDate =
 				from e in events
-				group e by new { Date = new Date(DoubleExtensions.ToLocalDateTimestampMilliseconds(e.Timestamp)), e.Kind } into eg
+				group e by new Date(DoubleExtensions.ToLocalDateTimestampMilliseconds(e.Timestamp)) into eg
 				select new
 				{
-					eg.Key.Date,
-					eg.Key.Kind,
-					EsentArrival = eg.FirstOrDefault(e => e.Kind == "ESENT_MIN").SomeNotNull(),
-					EsentDepature = eg.FirstOrDefault(e => e.Kind == "ESENT_MAX").SomeNotNull(),
-					OtherArrival = eg.FirstOrDefault(e => e.Kind == "OTHEREVENT_MIN").SomeNotNull(),
-					OtherDepature = eg.FirstOrDefault(e => e.Kind == "OTHEREVENT_MAX").SomeNotNull()
+					Date = eg.Key,
+					EsentArrival = ReduceTime(eg, "ESENT_MIN", g => g.Min()),
+					EsentDepature = ReduceTime(eg, "ESENT_MAX", g => g.Max()),
+					OtherArrival = ReduceTime(eg, "OTHEREVENT_MIN", g => g.Min()),
+					OtherDepature = ReduceTime(eg, "OTHEREVENT_MAX", g => g.Max()),
 
-					// Should really be singles
+					// Because logged times do not use date as key b
+
+					//EsentA = eg.Where(e => e.Kind == "ESENT_MIN").ToList(),
+					//OtherA = eg.Where(e => e.Kind == "ESENT_MAX").ToList(),
+					//EsentD = eg.Where(e => e.Kind == "OTHEREVENT_MIN").ToList(),
+					//OtherD = eg.Where(e => e.Kind == "OTHEREVENT_MAX").ToList()
+
+					// Should really be partitioned by localDate of the clients timezone.
 				};
 
 			Option<float> RoundHours(Option<long> unixTimestamp)
@@ -54,19 +74,16 @@ namespace Timereporter.Core
 
 			}
 			
-			IEnumerable<WorkdayDto> Rereduce()
+			IEnumerable<WorkdayDto> RereduceTime()
 			{
-				foreach (var r in reduced)
+				foreach (var r in reduceDate)
 				{
-					//Workday workday = new Workday();
-					//workday.DateText = r.Date.DateText;
 					Option<long> arrival = Option.None<long>();
 					Option<long> departure = Option.None<long>();
-
-					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = a.Timestamp.Some()));
-					arrival.MatchNone(() => r.OtherArrival.MatchSome(a => arrival = a.Timestamp.Some()));
-					departure.MatchNone(() => r.EsentArrival.MatchSome(a => departure = a.Timestamp.Some()));
-					departure.MatchNone(() => r.OtherArrival.MatchSome(a => departure = a.Timestamp.Some()));
+					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = a.Some()));
+					arrival.MatchNone(() => r.OtherArrival.MatchSome(a => arrival = a.Some()));
+					departure.MatchNone(() => r.EsentDepature.MatchSome(a => departure = a.Some()));
+					departure.MatchNone(() => r.OtherDepature.MatchSome(a => departure = a.Some()));
 
 					yield return new WorkdayDto
 					{
@@ -78,9 +95,11 @@ namespace Timereporter.Core
 				}
 			}
 
+			// System.Diagnostics.Debugger.Break();
+
 			return new Workdays
 			{
-				List = Rereduce().ToList()
+				List = RereduceTime().ToList()
 			};
 		}
 

@@ -65,7 +65,7 @@ namespace Timereporter.EventLogTask
 			var tracker = container.Value.GetInstance<EventLogTracker>();
 			tracker.OnProgressChanged += Tracker_OnProgressChanged;
 			var dateTimeValueFactory = container.Value.GetInstance<IDateTimeValueFactory>();
-			Date from = WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
+			Date from = new Date(2019, 1, 1); // WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
 			Date to = dateTimeValueFactory.LocalToday();
 			Dictionary<string, Time> minMaxes = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", from, to, fill: true));
 
