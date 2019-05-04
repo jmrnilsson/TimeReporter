@@ -17,6 +17,12 @@ Set-Location .\bin\Debug\netcoreapp2.1\
 7z a Timereporter.EventLogTask.win10-x64.zip .\win10-x64\
 ```
 
+### Winforms client
+![alt text](./Example.GIF)
+
+### Console client
+![alt text](./Example2.GIF)
+
 Microsoft docs on building and publishing:
 - [dotnet-publish](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish?tabs=netcore21)
 - [Os and arch designation](https://docs.microsoft.com/en-us/dotnet/core/rid-catalog)
