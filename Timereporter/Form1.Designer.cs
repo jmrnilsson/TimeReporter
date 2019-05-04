@@ -45,8 +45,10 @@
             this.Report = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Week = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.SuspendLayout();
             // 
             // contextMenuStrip1
@@ -103,10 +105,10 @@
             this.Report,
             this.Week});
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.dataGridView1.Location = new System.Drawing.Point(0, 115);
+            this.dataGridView1.Location = new System.Drawing.Point(0, 111);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 28;
-            this.dataGridView1.Size = new System.Drawing.Size(962, 1050);
+            this.dataGridView1.Size = new System.Drawing.Size(962, 1054);
             this.dataGridView1.TabIndex = 3;
             // 
             // Date
@@ -161,11 +163,19 @@
             this.comboBox1.Size = new System.Drawing.Size(152, 28);
             this.comboBox1.TabIndex = 4;
             // 
+            // trackBar1
+            // 
+            this.trackBar1.Location = new System.Drawing.Point(326, 12);
+            this.trackBar1.Name = "trackBar1";
+            this.trackBar1.Size = new System.Drawing.Size(445, 69);
+            this.trackBar1.TabIndex = 5;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(962, 1165);
+            this.Controls.Add(this.trackBar1);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.button1);
@@ -176,7 +186,9 @@
             this.Move += new System.EventHandler(this.Form1_Move);
             this.contextMenuStrip1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -197,6 +209,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn Report;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Week;
 		private System.Windows.Forms.ComboBox comboBox1;
+		private System.Windows.Forms.TrackBar trackBar1;
 	}
 }
 
