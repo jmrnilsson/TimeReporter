@@ -44,6 +44,7 @@
             this.Total = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Report = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Week = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -102,10 +103,10 @@
             this.Report,
             this.Week});
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.dataGridView1.Location = new System.Drawing.Point(0, 55);
+            this.dataGridView1.Location = new System.Drawing.Point(0, 115);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 28;
-            this.dataGridView1.Size = new System.Drawing.Size(962, 1110);
+            this.dataGridView1.Size = new System.Drawing.Size(962, 1050);
             this.dataGridView1.TabIndex = 3;
             // 
             // Date
@@ -152,11 +153,20 @@
             this.Week.Name = "Week";
             this.Week.ReadOnly = true;
             // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(147, 17);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(152, 28);
+            this.comboBox1.TabIndex = 4;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(962, 1165);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.button1);
             this.Cursor = System.Windows.Forms.Cursors.Arrow;
@@ -186,6 +196,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn Total;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Report;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Week;
+		private System.Windows.Forms.ComboBox comboBox1;
 	}
 }
 

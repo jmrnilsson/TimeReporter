@@ -42,6 +42,8 @@ namespace Timereporter
 		{
 			GridMutator.Load(dataGridView1);
 			_gridActor = new GridActor(dataGridView1);
+
+			GridMutator.Load(comboBox1);
 		}
 
 		private void Button1_Click(object sender, EventArgs e)

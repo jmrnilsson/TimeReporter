@@ -10,11 +10,32 @@ using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using System.Text;
 using Timereporter.Core;
+using NodaTime;
+using System.Globalization;
 
 namespace Timereporter
 {
 	public static class GridMutator
 	{
+		public static void Load(ComboBox comboBox1)
+		{
+			{
+				var instant = SystemClock.Instance.GetCurrentInstant();
+				DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+				var monthRange = Extensions.ReverseMonthRange(instant, tz, 4);
+
+				var options = monthRange.Select(m => new MonthOption
+				{
+					YearMonth = $"{m.Year}-{m.Month}",
+					Name = new DateTime(m.Year, m.Month, 1).ToString("MMMM", CultureInfo.InvariantCulture)
+				}).ToList();
+
+				comboBox1.DataSource = options;
+				comboBox1.DisplayMember = "Name";
+				comboBox1.ValueMember = "YearMonth";
+			}
+		}
+
 		public static void Load(DataGridView dgv)
 		{
 			dgv.Rows.Clear();

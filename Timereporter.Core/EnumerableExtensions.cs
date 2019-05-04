@@ -175,5 +175,20 @@ namespace Timereporter.Core
 
 			return EnumerateDates_().ToArray();
 		}
+
+		public static IEnumerable<LocalDate> ReverseMonthRange(Instant instant, DateTimeZone tz, int count)
+		{
+			LocalDate today = instant.InZone(tz).Date;
+			int year = today.Year;
+			int month = today.Month;
+
+			for (int i = 0; i < count; i++)
+			{
+				var localDate = new LocalDate(year, month, 1).Minus(Period.FromDays(i));
+				year = localDate.Year;
+				month = localDate.Month;
+				yield return localDate;
+			}
+		} 
 	}
 }
