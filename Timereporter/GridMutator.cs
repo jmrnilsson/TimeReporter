@@ -12,44 +12,58 @@ using System.Text;
 using Timereporter.Core;
 using NodaTime;
 using System.Globalization;
+using Optional;
 
 namespace Timereporter
 {
-	public static class GridMutator
+	public class GridMutator
 	{
-		public static void Load(ComboBox comboBox1)
+		private readonly DataGridView dgv;
+
+		public GridMutator(DataGridView dgv)
+		{
+			this.dgv = dgv;
+		}
+
+		public void Load(ComboBox comboBox1)
 		{
 			{
 				var instant = SystemClock.Instance.GetCurrentInstant();
 				DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-				var monthRange = Extensions.ReverseMonthRange(instant, tz, 4);
+				var monthRange = Extensions.ReverseMonthRange(instant, tz, 9);
 
-				var options = monthRange.Select(m => new MonthOption
-				{
-					YearMonth = $"{m.Year}-{m.Month}",
-					Name = new DateTime(m.Year, m.Month, 1).ToString("MMMM", CultureInfo.InvariantCulture)
-				}).ToList();
+				var options =
+					from ym in monthRange
+					let readableMonth = new DateTime(ym.Year, ym.Month, 1).ToString("MMMM", CultureInfo.InvariantCulture)
+					select new DateOption
+					{
+						YearMonth = $"{ym.Year}-{ym.Month}",
+						Name = $"{ym.Year}, {readableMonth}",
+						Date = ym
+					};
 
-				comboBox1.DataSource = options;
+				comboBox1.DataSource = options.ToList();
 				comboBox1.DisplayMember = "Name";
 				comboBox1.ValueMember = "YearMonth";
 			}
 		}
 
-		public static void Load(DataGridView dgv)
+		public void Load(Option<LocalDate> yearMonthOption)
 		{
 			dgv.Rows.Clear();
 
 			Color lgray = Color.FromArgb(255, 240, 240, 240);
 			Color lred = Color.FromArgb(255, 255, 244, 244);
 
-			DateTime chosenMonth;
+			LocalDate localDate = yearMonthOption.ValueOr(delegate ()
 			{
-				var now = DateTime.Now;
-				chosenMonth = now.AddDays(0 - now.Day - 1);
-			}
-			var workdays = WorkdayHelper.Range(chosenMonth.Year, chosenMonth.Month);
-			var workdayKvp = GetData(chosenMonth.Year, chosenMonth.Month);
+				Instant now = SystemClock.Instance.GetCurrentInstant();
+				DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+				return now.InZone(tz).Date;
+			});
+
+			var workdays = WorkdayHelper.Range(localDate.Year, localDate.Month);
+			var workdayKvp = GetData(localDate.Year, localDate.Month);
 			var workKvp = workdayKvp.ToDictionary(wd => wd.Date);
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
@@ -105,7 +119,7 @@ namespace Timereporter
 			// Use pre-defined columns instead `dgv.DataSource = data.Workdays`;
 		}
 
-		public static IEnumerable<WorkdayDto> GetData(int year, int month)
+		public IEnumerable<WorkdayDto> GetData(int year, int month)
 		{
 
 			using (var client = new HttpClient())

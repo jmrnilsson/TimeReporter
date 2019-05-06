@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Optional;
+using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace Timereporter
@@ -6,10 +8,15 @@ namespace Timereporter
 	public partial class Form1 : Form
 	{
 		private GridActor _gridActor;
+		private GridMutator _mutator;
 
 		public Form1()
 		{
 			InitializeComponent();
+			_gridActor = new GridActor(dataGridView1);
+			_mutator = new GridMutator(dataGridView1);
+			comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
+			LoadData();
 		}
 
 		private void ShowToolStripMenuItem_Click(object sender, EventArgs e)
@@ -40,15 +47,19 @@ namespace Timereporter
 
 		private void LoadData()
 		{
-			GridMutator.Load(dataGridView1);
-			_gridActor = new GridActor(dataGridView1);
-
-			GridMutator.Load(comboBox1);
+			_mutator.Load(comboBox1);
 		}
 
 		private void Button1_Click(object sender, EventArgs e)
 		{
 			LoadData();
+		}
+
+		private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			var comboBox = sender as ComboBox;
+			var monthOption = comboBox.SelectedItem as DateOption;
+			monthOption.SomeNotNull().MatchSome(o => _mutator.Load(o.Date.Some()));
 		}
 	}
 }
