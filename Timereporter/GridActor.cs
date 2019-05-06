@@ -1,6 +1,10 @@
-﻿using System;
+﻿using NodaTime;
+using Optional;
+using System;
 using System.Data;
 using System.Windows.Forms;
+using Timereporter.Core;
+using Timereporter.Core.Models;
 
 namespace Timereporter
 {
@@ -22,11 +26,29 @@ namespace Timereporter
 
 		private void Dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
 		{
+			Option<string> GetEventName()
+			{
+				switch (e.ColumnIndex)
+				{
+					case 4: return "USER_MAX".Some();
+					case 3: return "USER_BREAK".Some();
+					case 2: return "USER_MIN".Some();
+					default: return Option.None<string>();
+				}
+			}
+
+			GetEventName().MatchSome(delegate (eventName)
+			{
+				DataGridViewCell cell = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex];
+				string formattedValue = cell.FormattedValue as string;
+				Instant instant = ParseFromSystemLocalToInstant()
+				ApiClient.PostEvent(new Event(eventName, instant));
+			});
 			//int columnIndex, rowIndex;
 			//columnIndex = e.ColumnIndex;
 			//rowIndex = e.RowIndex;
-			DataGridViewCell cell = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex];
-			string formattedValue = cell.FormattedValue as string;
+
+			
 
 			var d = Convert.ToDecimal(new DataTable().Compute(formattedValue, null));
 			d = Math.Round(d, 1);
@@ -36,7 +58,7 @@ namespace Timereporter
 
 			// public object Compute(string expression, string filter);
 			// string key = dgv.Rows[e.RowIndex].Cells[0].Value as string;
-			throw new System.NotImplementedException();
+
 		}
 	}
 }
