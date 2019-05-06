@@ -189,6 +189,66 @@ namespace Timereporter.Core
 				month = localDate.Month;
 				yield return localDate;
 			}
-		} 
+		}
+
+		public static float SummarizeWorkday(this WorkdayDto workday)
+		{
+			return workday.DepartureHours - workday.BreakHours - workday.ArrivalHours;
+		}
+
+		public static Dictionary<LocalDate, int> GetEuropeanWeeks(this int year)
+		{
+			var firstDay = new LocalDate(year, 1, 1);
+
+			// TODO: Inline-method switch this instead;
+			LocalDate firstDayOfWeekOne;
+			if (firstDay.DayOfWeek == IsoDayOfWeek.Monday)
+			{
+				firstDayOfWeekOne = firstDay;
+			}
+			else if (firstDay.DayOfWeek == IsoDayOfWeek.Tuesday)
+			{
+				firstDayOfWeekOne = firstDay.Minus(Period.FromDays(1));
+			}
+			else if (firstDay.DayOfWeek == IsoDayOfWeek.Wednesday)
+			{
+				firstDayOfWeekOne = firstDay.Minus(Period.FromDays(2));
+			}
+			else if (firstDay.DayOfWeek == IsoDayOfWeek.Thursday)
+			{
+				firstDayOfWeekOne = firstDay.Minus(Period.FromDays(3));
+			}
+			else if (firstDay.DayOfWeek == IsoDayOfWeek.Friday)
+			{
+				firstDayOfWeekOne = firstDay.PlusDays(3);
+			}
+			else if (firstDay.DayOfWeek == IsoDayOfWeek.Saturday)
+			{
+				firstDayOfWeekOne = firstDay.PlusDays(2);
+			}
+			else if (firstDay.DayOfWeek == IsoDayOfWeek.Sunday)
+			{
+				firstDayOfWeekOne = firstDay.PlusDays(1);
+			}
+			else
+			{
+				throw new DataMisalignedException("Week numbers make no sense");
+			}
+
+			Dictionary<LocalDate, int> lookup = new Dictionary<LocalDate, int>();
+
+			int week = 0;
+			for(int i = 0; year >= firstDayOfWeekOne.PlusDays(i).Year; i++)
+			{
+				if (i % 7 == 0)
+				{
+					week++;
+				}
+
+				lookup.Add(firstDayOfWeekOne.PlusDays(i), week);
+			}
+
+			return lookup;
+		}
 	}
 }

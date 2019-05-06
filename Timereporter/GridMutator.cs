@@ -65,6 +65,7 @@ namespace Timereporter
 			var workdays = WorkdayHelper.Range(localDate.Year, localDate.Month);
 			var workdayKvp = GetData(localDate.Year, localDate.Month);
 			var workKvp = workdayKvp.ToDictionary(wd => wd.Date);
+			var weeks = Extensions.GetEuropeanWeeks(localDate.Year);
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
 			for (int i = 0; i < workdays.Count; i++)
@@ -78,7 +79,8 @@ namespace Timereporter
 						wd.DayOfWeekText,
 						workKvp[wd.DateText].ArrivalHours.ToString("0.0"),
 						workKvp[wd.DateText].BreakHours.ToString("0.0"),
-						workKvp[wd.DateText].DepartureHours.ToString("0.0")
+						workKvp[wd.DateText].DepartureHours.ToString("0.0"),
+						workKvp[wd.DateText].SummarizeWorkday().ToString("0.0")
 					);
 
 					if (Enum.TryParse<TimeConfidence>(workKvp[wd.DateText].ArrivalConfidence, out TimeConfidence arrivalConfidence))
