@@ -30,7 +30,7 @@ namespace Timereporter
 			{
 				var instant = SystemClock.Instance.GetCurrentInstant();
 				DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-				var monthRange = Extensions.ReverseMonthRange(instant, tz, 9);
+				var monthRange = EnumerableExtensions.ReverseMonthRange(instant, tz, 9);
 
 				var options =
 					from ym in monthRange
@@ -65,7 +65,7 @@ namespace Timereporter
 			var workdays = WorkdayHelper.Range(localDate.Year, localDate.Month);
 			var workdayKvp = GetData(localDate.Year, localDate.Month);
 			var workKvp = workdayKvp.ToDictionary(wd => wd.Date);
-			var weeks = Extensions.GetEuropeanWeeks(localDate.Year);
+			var weeks = EnumerableExtensions.GetEuropeanWeeks(localDate.Year);
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
 			for (int i = 0; i < workdays.Count; i++)

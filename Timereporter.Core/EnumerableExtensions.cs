@@ -2,6 +2,7 @@
 using Optional;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -17,7 +18,7 @@ namespace Timereporter.Core
 		None
 	}
 
-	public static class Extensions
+	public static class EnumerableExtensions
 	{
 		public static List<T> ToList<T>(this IEnumerable<T> iterable, Action<int, T> tap, Predicate<T> filter = null)
 		{
@@ -54,6 +55,10 @@ namespace Timereporter.Core
 				select new
 				{
 					Date = eg.Key,
+					UserArrivalIgnore = ReduceTime(eg, "USER_MIN_REMOVE", g => g.Min()),
+					UserDepartureIgnore = ReduceTime(eg, "USER_MAX_REMOVE", g => g.Max()),
+					UserArrival = ReduceTime(eg, "USER_MIN", g => g.Min()),
+					UserDeparture = ReduceTime(eg, "USER_MAX", g => g.Max()),
 					EsentArrival = ReduceTime(eg, "ESENT_MIN", g => g.Min()),
 					EsentDepature = ReduceTime(eg, "ESENT_MAX", g => g.Max()),
 					OtherArrival = ReduceTime(eg, "OTHEREVENT_MIN", g => g.Min()),
@@ -93,8 +98,20 @@ namespace Timereporter.Core
 					Option<(long, TimeConfidence)> arrival = Option.None<(long, TimeConfidence)>();
 					Option<(long, TimeConfidence)> departure = Option.None<(long, TimeConfidence)>();
 
-					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = (a, TimeConfidence.Confident) .Some()));
+					// This is to messy for a worksheet update. Use CRUD approach for stored cell values.!!
+					r.UserArrivalIgnore.MatchNone
+					(
+						() => arrival.MatchNone(() => r.UserArrival.MatchSome(a => arrival = (a, TimeConfidence.Certain).Some()))
+					);
+
+					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = (a, TimeConfidence.Confident).Some()));
 					arrival.MatchNone(() => r.OtherArrival.MatchSome(a => arrival = (a, TimeConfidence.Insecure).Some()));
+
+					r.UserDepartureIgnore.MatchNone
+					(
+						() => departure.MatchNone(() => r.UserDeparture.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()))
+					);
+
 					departure.MatchNone(() => r.EsentDepature.MatchSome(a => departure = (a, TimeConfidence.Confident).Some()));
 					departure.MatchNone(() => r.OtherDepature.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()));
 
@@ -249,6 +266,30 @@ namespace Timereporter.Core
 			}
 
 			return lookup;
+		}
+
+		public static long FromHourDecimalExpressionToUnixTimestampMilliseconds(this string hourDecimalExpression, LocalDate localDate, DateTimeZone tdz)
+		{
+			decimal hourDecimal;
+			{
+				if (!decimal.TryParse(hourDecimalExpression, out hourDecimal))
+				{
+					var style = NumberStyles.AllowDecimalPoint
+						| NumberStyles.AllowThousands
+						| NumberStyles.AllowTrailingWhite;
+
+					hourDecimal = decimal.Parse(hourDecimalExpression, style, CultureInfo.InvariantCulture);
+				}
+			}
+			var hour = Math.Floor(hourDecimal);
+			var decimalOnly = hourDecimal - hour;
+			int hour_ = Convert.ToInt32(hour);
+			int minutes = Convert.ToInt32(decimalOnly * 60m);
+
+			LocalDateTime localDateTime = new LocalDateTime(localDate.Year, localDate.Month, localDate.Day, hour_, minutes);
+			ZonedDateTime dateTimeZoned = localDateTime.InZoneLeniently(tdz);
+			Instant instant = dateTimeZoned.ToInstant();
+			return instant.ToUnixTimeMilliseconds();
 		}
 	}
 }

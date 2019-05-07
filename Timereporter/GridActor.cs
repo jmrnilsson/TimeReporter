@@ -2,6 +2,7 @@
 using Optional;
 using System;
 using System.Data;
+using System.Globalization;
 using System.Windows.Forms;
 using Timereporter.Core;
 using Timereporter.Core.Models;
@@ -31,27 +32,43 @@ namespace Timereporter
 				switch (e.ColumnIndex)
 				{
 					case 4: return "USER_MAX".Some();
-					case 3: return "USER_BREAK".Some();
+					case 3: goto default; // throw new NotSupportedException("USER_BREAK not supported yet!");
 					case 2: return "USER_MIN".Some();
 					default: return Option.None<string>();
 				}
 			}
 
-			GetEventName().MatchSome(delegate (eventName)
+			void PostNew(string value_, string eventName, LocalDate localDate, DateTimeZone tdz)
+			{
+				long instant = value_.FromHourDecimalExpressionToUnixTimestampMilliseconds(localDate, tdz);
+				ApiClient.PostEvent(new Event(eventName, instant));
+			}
+
+			void PostIgnore(string eventName, LocalDate localDate, DateTimeZone tdz)
+			{
+				long instant = "0.1".FromHourDecimalExpressionToUnixTimestampMilliseconds(localDate, tdz);
+				ApiClient.PostEvent(new Event($"{eventName}_REMOVE", instant));
+			}
+
+			GetEventName().MatchSome(delegate (string eventName)
 			{
 				DataGridViewCell cell = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex];
 				string formattedValue = cell.FormattedValue as string;
-				Instant instant = ParseFromSystemLocalToInstant()
-				ApiClient.PostEvent(new Event(eventName, instant));
+				string date = dgv.Rows[e.RowIndex].Cells[0].FormattedValue as string;
+				DateTime localDateTime = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+				LocalDate localDate = new LocalDate(localDateTime.Year, localDateTime.Month, localDateTime.Day);
+				DateTimeZone tdz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+				Option<string> value = formattedValue.SomeWhen(v => !string.IsNullOrEmpty(v));
+				value.Match
+				(
+					some: v => PostNew(v, eventName, localDate, tdz),
+					none: () => PostIgnore(eventName, localDate, tdz)
+				);
 			});
-			//int columnIndex, rowIndex;
-			//columnIndex = e.ColumnIndex;
-			//rowIndex = e.RowIndex;
+		
 
-			
-
-			var d = Convert.ToDecimal(new DataTable().Compute(formattedValue, null));
-			d = Math.Round(d, 1);
+			//var d = Convert.ToDecimal(new DataTable().Compute("", null));
+			//d = Math.Round(d, 1);
 			//DataColumn taxColumn = new DataColumn();
 			//taxColumn.DataType = System.Type.GetType("System.Decimal");
 			//taxColumn.Expression = formattedValue;

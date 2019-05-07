@@ -32,7 +32,18 @@ namespace Timereporter.Api.Controllers
 			var fromLocalDate = tz.AtStartOfDay(new LocalDate(year, month, 1));
 			var exclusiveToLocalDate = tz.AtStartOfDay(new LocalDate(year, month, DateTime.DaysInMonth(year, month)).PlusDays(1));
 			var wd = workdays.Find(fromLocalDate.ToInstant(), exclusiveToLocalDate.ToInstant());
-			return Ok(Extensions.ToWorkdays(wd, tz));
+			return Ok(EnumerableExtensions.ToWorkdays(wd, tz));
+		}
+
+		[HttpGet("arrival/{minutes:int}")]
+		public IActionResult Get(int minutes)
+		{
+			throw new NotImplementedException();
+			//var tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+			//var fromLocalDate = tz.AtStartOfDay(new LocalDate(year, month, 1));
+			//var exclusiveToLocalDate = tz.AtStartOfDay(new LocalDate(year, month, DateTime.DaysInMonth(year, month)).PlusDays(1));
+			//var wd = workdays.Find(fromLocalDate.ToInstant(), exclusiveToLocalDate.ToInstant());
+			//return Ok(Extensions.ToWorkdays(wd, tz));
 		}
 	}
 }

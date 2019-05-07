@@ -74,7 +74,7 @@ namespace Timereporter.EventLogTask
 		{
 			var kvp = minMaxList.ToDictionary(mm => mm.Date, mm => mm);
 
-			foreach (Date date in Extensions.DateRange(from, to))
+			foreach (Date date in EnumerableExtensions.DateRange(from, to))
 			{
 				yield return kvp.GetValueOrDefault(date.DateText(), new Time(date, Option.None<string>(), Option.None<Instant>(), Option.None<Instant>()));
 			}

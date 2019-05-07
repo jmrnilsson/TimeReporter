@@ -17,7 +17,7 @@ namespace Timereporter.Core.Collections
 
 		public Workdays(int year, int month)
 		{
-			workdays = Extensions.WorkdayRange(year, month);
+			workdays = EnumerableExtensions.WorkdayRange(year, month);
 		}
 			   
 		IEnumerator IEnumerable.GetEnumerator()

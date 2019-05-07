@@ -12,8 +12,8 @@ namespace Timereporter.Api.Models
 		public string Date { get; set; }
 		public DateTime Added { get; set; }
 		public DateTime Changed { get; set; }
-		public DateTime Arrival { get; set; }
-		public DateTime Departure { get; set; }
-		public int BreakDurationSeconds { get; set; }
+		public int ArrivalSeconds { get; set; }
+		public int DepartureSeconds { get; set; }
+		public int BreakSeconds { get; set; }
 	}
 }

@@ -6,7 +6,6 @@ using Timereporter.Core.Models;
 namespace Timereporter.Core.Models
 {
 
-
 	public class Workday : IWorkday
 	{
 		private readonly Date date;
@@ -28,6 +27,7 @@ namespace Timereporter.Core.Models
 			this.departure = departure;
 			otherDays = new List<Workday>();
 		}
+
 		public Workday(DateTime date, int arrival, int @break, int departure)
 		{
 			this.date = new Date(date);
