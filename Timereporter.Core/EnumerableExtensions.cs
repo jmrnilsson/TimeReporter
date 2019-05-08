@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using Timereporter.Core.Models;
 
 namespace Timereporter.Core
@@ -23,7 +22,7 @@ namespace Timereporter.Core
 		public static List<T> ToList<T>(this IEnumerable<T> iterable, Action<int, T> tap, Predicate<T> filter = null)
 		{
 			List<T> list = new List<T>();
-			foreach (var tuple in iterable.Select((item, i) => (Item: item, Index:i)))
+			foreach (var tuple in iterable.Select((item, i) => (Item: item, Index: i)))
 			{
 				tap(tuple.Index, tuple.Item);
 				if (filter == null || filter(tuple.Item))
@@ -55,8 +54,6 @@ namespace Timereporter.Core
 				select new
 				{
 					Date = eg.Key,
-					UserArrivalIgnore = ReduceTime(eg, "USER_MIN_REMOVE", g => g.Min()),
-					UserDepartureIgnore = ReduceTime(eg, "USER_MAX_REMOVE", g => g.Max()),
 					UserArrival = ReduceTime(eg, "USER_MIN", g => g.Min()),
 					UserDeparture = ReduceTime(eg, "USER_MAX", g => g.Max()),
 					EsentArrival = ReduceTime(eg, "ESENT_MIN", g => g.Min()),
@@ -74,24 +71,24 @@ namespace Timereporter.Core
 					// Should really be partitioned by localDate of the clients timezone.
 				};
 
-			Option<float> RoundHours(Option<(long, TimeConfidence)> unixTimestamp)
+			string RoundHours(Option<(long, TimeConfidence)> unixTimestamp)
 			{
 				var hours = Option.None<float>();
 				unixTimestamp.MatchSome(ts =>
 				{
 					var value = ts.Item1.ToInstantFromUnixTimestampMilliseconds().InZone(timeZone).LocalDateTime.TimeOfDay;
-					var roundedHours = (float) value.Hour + (float)value.Minute / (float)60 + (float)value.Second / (float)3600 + (float)value.Millisecond / (float)360000;
+					var roundedHours = (float)value.Hour + (float)value.Minute / (float)60 + (float)value.Second / (float)3600 + (float)value.Millisecond / (float)360000;
 					hours = roundedHours.Some();
 				});
-				return hours;
+				return hours.Match(some: h => h.ToString("0.0"), none: () => "");
 			}
 
 			string ConfidenceText(Option<(long, TimeConfidence)> unixTimestamp)
 			{
 				return unixTimestamp.ValueOr((0, TimeConfidence.None)).Item2.ToString();
 			}
-			
-			IEnumerable<WorkdayDto> RereduceTime()
+
+			IEnumerable<WorkdayDetailsDto> RereduceTime()
 			{
 				foreach (var r in reduceDate)
 				{
@@ -99,30 +96,29 @@ namespace Timereporter.Core
 					Option<(long, TimeConfidence)> departure = Option.None<(long, TimeConfidence)>();
 
 					// This is to messy for a worksheet update. Use CRUD approach for stored cell values.!!
-					r.UserArrivalIgnore.MatchNone
-					(
-						() => arrival.MatchNone(() => r.UserArrival.MatchSome(a => arrival = (a, TimeConfidence.Certain).Some()))
-					);
 
+					arrival.MatchNone(() => r.UserArrival.MatchSome(a => arrival = (a, TimeConfidence.Certain).Some()));
 					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = (a, TimeConfidence.Confident).Some()));
 					arrival.MatchNone(() => r.OtherArrival.MatchSome(a => arrival = (a, TimeConfidence.Insecure).Some()));
 
-					r.UserDepartureIgnore.MatchNone
-					(
-						() => departure.MatchNone(() => r.UserDeparture.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()))
-					);
-
+					departure.MatchNone(() => r.UserDeparture.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()));
 					departure.MatchNone(() => r.EsentDepature.MatchSome(a => departure = (a, TimeConfidence.Confident).Some()));
 					departure.MatchNone(() => r.OtherDepature.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()));
+					
+					Option<long> total = Option.None<long>();
 
-					yield return new WorkdayDto
+					// No break for now. No use of Summarize either
+					arrival.MatchSome(a => departure.MatchSome(d => total = (d.Item1 - a.Item1).Some()));
+
+					yield return new WorkdayDetailsDto
 					{
 						Date = r.Date.DateText(),
-						ArrivalHours = RoundHours(arrival).ValueOr(0),
+						ArrivalHours = RoundHours(arrival),
 						ArrivalConfidence = ConfidenceText(arrival),
-						BreakHours = 0,
-						DepartureHours = RoundHours(departure).ValueOr(0),
-						DepartureConfidence = ConfidenceText(departure)
+						BreakHours = "",
+						DepartureHours = RoundHours(departure),
+						DepartureConfidence = ConfidenceText(departure),
+						Total = total.Match(some: v => (v / (float) (60 * 60000)).ToString("0.0"), none: () => "")
 					};
 				}
 			}
@@ -208,9 +204,22 @@ namespace Timereporter.Core
 			}
 		}
 
-		public static float SummarizeWorkday(this WorkdayDto workday)
+		public static Option<float> SummarizeWorkday(this WorkdayDto workday)
 		{
-			return workday.DepartureHours - workday.BreakHours - workday.ArrivalHours;
+			if (workday.DepartureHours.HasValue && workday.ArrivalHours.HasValue)
+			{
+				float total = workday.DepartureHours.Value;
+				total -= workday.ArrivalHours.Value;
+				
+				if (workday.BreakHours.HasValue)
+				{
+					total -= workday.BreakHours.Value;
+				}
+
+				return total.Some();
+			}
+
+			return Option.None<float>();
 		}
 
 		public static Dictionary<LocalDate, int> GetEuropeanWeeks(this int year)
@@ -255,7 +264,7 @@ namespace Timereporter.Core
 			Dictionary<LocalDate, int> lookup = new Dictionary<LocalDate, int>();
 
 			int week = 0;
-			for(int i = 0; year >= firstDayOfWeekOne.PlusDays(i).Year; i++)
+			for (int i = 0; year >= firstDayOfWeekOne.PlusDays(i).Year; i++)
 			{
 				if (i % 7 == 0)
 				{
@@ -290,6 +299,18 @@ namespace Timereporter.Core
 			ZonedDateTime dateTimeZoned = localDateTime.InZoneLeniently(tdz);
 			Instant instant = dateTimeZoned.ToInstant();
 			return instant.ToUnixTimeMilliseconds();
+		}
+
+		public static string Base64Encode(this string plainText)
+		{
+			var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+			return System.Convert.ToBase64String(plainTextBytes);
+		}
+
+		public static string Base64Decode(this  string base64EncodedData)
+		{
+			var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
+			return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
 		}
 	}
 }

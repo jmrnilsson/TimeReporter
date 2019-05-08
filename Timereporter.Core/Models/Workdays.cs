@@ -8,6 +8,6 @@ namespace Timereporter.Core.Models
 		{
 		}
 
-		public List<WorkdayDto> List { get; set; }
+		public List<WorkdayDetailsDto> List { get; set; }
 	}
 }

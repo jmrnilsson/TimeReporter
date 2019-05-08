@@ -17,6 +17,7 @@ using NodaTime.Serialization;
 using NodaTime.Serialization.JsonNet;
 using NodaTime;
 using System.Text.RegularExpressions;
+using Timereporter.Core;
 
 namespace Timereporter.Api
 {
@@ -42,7 +43,8 @@ namespace Timereporter.Api
 			services.AddSingleton<DatabaseContextFactoryDelegate>(DatabaseContextFactory);
 			services.AddScoped<ICursorRepository, CursorRepository>();
 			services.AddScoped<IEventLog, EventPersistentLog>();
-			services.AddScoped<Workdays>();
+			services.AddScoped<WorkdayRepository>();
+			services.AddScoped<WorkdaySummarizer>();
 		}
 
 		private static DatabaseContext DatabaseContextFactory()

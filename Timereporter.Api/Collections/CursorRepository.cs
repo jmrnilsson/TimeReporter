@@ -18,9 +18,9 @@ namespace Timereporter.Api.Collections
 
 		public void Save(Cursor cursor)
 		{
-			Models.CursorDo Create(DatabaseContext db)
+			CursorDo Create(DatabaseContext db)
 			{
-				var c = new Models.CursorDo() { Added = cursor.Changed };
+				var c = new CursorDo() { Added = cursor.Changed };
 				db.Add(c);
 				return c;
 			}

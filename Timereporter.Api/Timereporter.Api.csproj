@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20190507230428_HumanReadableKeyToWorkday.cs" />
+    <Compile Remove="Migrations\20190507230428_HumanReadableKeyToWorkday.Designer.cs" />
+    <Compile Remove="Migrations\20190507230519_RemoveWorkdayCommentForNow.cs" />
+    <Compile Remove="Migrations\20190507230519_RemoveWorkdayCommentForNow.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

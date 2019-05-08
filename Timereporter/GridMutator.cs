@@ -62,54 +62,41 @@ namespace Timereporter
 				return now.InZone(tz).Date;
 			});
 
-			var workdays = WorkdayHelper.Range(localDate.Year, localDate.Month);
-			var workdayKvp = GetData(localDate.Year, localDate.Month);
-			var workKvp = workdayKvp.ToDictionary(wd => wd.Date);
-			var weeks = EnumerableExtensions.GetEuropeanWeeks(localDate.Year);
+			var workdays = GetData(localDate.Year, localDate.Month).ToList();
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
 			for (int i = 0; i < workdays.Count; i++)
 			{
-				IWorkday wd = workdays[i];
-				if (workKvp.ContainsKey(wd.DateText) && !wd.IsWeekend())
+				var wd = workdays[i];
+
+				dgv.Rows.Add
+				(
+					wd.Date,
+					wd.DayOfWeek,
+					wd.ArrivalHours,
+					wd.BreakHours,
+					wd.DepartureHours,
+					wd.Total
+				);
+
+				if (Enum.TryParse(wd.ArrivalConfidence, out TimeConfidence arrivalConfidence))
 				{
-					dgv.Rows.Add
-					(
-						wd.DateText,
-						wd.DayOfWeekText,
-						workKvp[wd.DateText].ArrivalHours.ToString("0.0"),
-						workKvp[wd.DateText].BreakHours.ToString("0.0"),
-						workKvp[wd.DateText].DepartureHours.ToString("0.0"),
-						workKvp[wd.DateText].SummarizeWorkday().ToString("0.0")
-					);
-
-					if (Enum.TryParse<TimeConfidence>(workKvp[wd.DateText].ArrivalConfidence, out TimeConfidence arrivalConfidence))
+					if (arrivalConfidence == TimeConfidence.Confident)
 					{
-						if (arrivalConfidence == TimeConfidence.Confident)
-						{
-							dgv.Rows[i].Cells[2].Style.BackColor = lred;
-						}
+						dgv.Rows[i].Cells[2].Style.BackColor = lred;
 					}
-
-					if (Enum.TryParse<TimeConfidence>(workKvp[wd.DateText].DepartureConfidence, out TimeConfidence departureConfidence))
-					{
-						if (departureConfidence == TimeConfidence.Confident)
-						{
-							dgv.Rows[i].Cells[4].Style.BackColor = lred;
-						}
-					}
-
-				}
-				else
-				{
-					dgv.Rows.Add
-					(
-						wd.DateText,
-						wd.DayOfWeekText
-					);
 				}
 
-				if (wd.IsWeekend())
+				if (Enum.TryParse(wd.DepartureConfidence, out TimeConfidence departureConfidence))
+				{
+					if (departureConfidence == TimeConfidence.Confident)
+					{
+						dgv.Rows[i].Cells[4].Style.BackColor = lred;
+					}
+				}
+
+
+				if (wd.IsWeekend)
 				{
 					dgv.Rows[i].DefaultCellStyle.BackColor = lgray;
 				}
@@ -121,7 +108,7 @@ namespace Timereporter
 			// Use pre-defined columns instead `dgv.DataSource = data.Workdays`;
 		}
 
-		public IEnumerable<WorkdayDto> GetData(int year, int month)
+		public IEnumerable<WorkdayDetailsDto> GetData(int year, int month)
 		{
 
 			using (var client = new HttpClient())
@@ -129,7 +116,9 @@ namespace Timereporter
 				client.DefaultRequestHeaders.Clear();
 				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-				var response = client.GetAsync($"http://localhost:53762/api/workday/{year}/{month}").Result;
+				var dateTimeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+				var dtz = dateTimeZone.Id.Replace("/", "_");
+				var response = client.GetAsync($"http://localhost:53762/api/workday/{year}/{month}/{dtz}").Result;
 
 				if (!response.IsSuccessStatusCode)
 				{

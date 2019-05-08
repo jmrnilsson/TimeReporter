@@ -12,13 +12,16 @@ namespace Timereporter.Api.Models
 
 		public DbSet<EventDo> Events { get; set; }
 		public DbSet<WorkdayDo> Workdays { get; set; }
-		public DbSet<WorkdayCommentDo> WorkdayComments { get; set; }
 		public DbSet<CursorDo> Cursors { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<EventDo>()
 				.HasKey(c => new { c.Timestamp, c.Kind });
+
+			modelBuilder.Entity<WorkdayDo>()
+				.Property(p => p.ConcurrencyToken)
+				.IsConcurrencyToken();
 		}
 	}
 }

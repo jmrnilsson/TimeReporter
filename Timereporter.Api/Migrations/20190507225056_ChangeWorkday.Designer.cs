@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Timereporter.Api.Models;
 
 namespace Timereporter.Api.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190507225056_ChangeWorkday")]
+    partial class ChangeWorkday
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,11 +53,33 @@ namespace Timereporter.Api.Migrations
                     b.ToTable("Events");
                 });
 
+            modelBuilder.Entity("Timereporter.Api.Models.WorkdayCommentDo", b =>
+                {
+                    b.Property<int>("WorkdayCommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("Added");
+
+                    b.Property<string>("Comment")
+                        .IsRequired();
+
+                    b.Property<string>("WorkdayDate");
+
+                    b.Property<int>("WorkdayId");
+
+                    b.HasKey("WorkdayCommentId");
+
+                    b.HasIndex("WorkdayDate");
+
+                    b.ToTable("WorkdayComments");
+                });
+
             modelBuilder.Entity("Timereporter.Api.Models.WorkdayDo", b =>
                 {
                     b.Property<string>("Date")
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(10);
+                        .HasMaxLength(8);
 
                     b.Property<DateTime>("Added");
 
@@ -65,14 +89,18 @@ namespace Timereporter.Api.Migrations
 
                     b.Property<DateTime>("Changed");
 
-                    b.Property<long>("ConcurrencyToken")
-                        .IsConcurrencyToken();
-
                     b.Property<int>("DepartureMilliseconds");
 
                     b.HasKey("Date");
 
                     b.ToTable("Workdays");
+                });
+
+            modelBuilder.Entity("Timereporter.Api.Models.WorkdayCommentDo", b =>
+                {
+                    b.HasOne("Timereporter.Api.Models.WorkdayDo", "Workday")
+                        .WithMany()
+                        .HasForeignKey("WorkdayDate");
                 });
 #pragma warning restore 612, 618
         }
