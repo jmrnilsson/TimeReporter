@@ -33,7 +33,7 @@ namespace Timereporter.Core
 			return list;
 		}
 
-		public static Workdays ToWorkdays(this List<Event> events, DateTimeZone timeZone)
+		public static IEnumerable<WorkdayDto> ToWorkdays(this List<Event> events, DateTimeZone timeZone)
 		{
 			Option<long> ReduceTime(IGrouping<Date, Event> grouping, string kind, Func<IEnumerable<long>, long> accumulator)
 			{
@@ -71,7 +71,7 @@ namespace Timereporter.Core
 					// Should really be partitioned by localDate of the clients timezone.
 				};
 
-			string RoundHours(Option<(long, TimeConfidence)> unixTimestamp)
+			Option<float> RoundHours(Option<(long, TimeConfidence)> unixTimestamp)
 			{
 				var hours = Option.None<float>();
 				unixTimestamp.MatchSome(ts =>
@@ -80,15 +80,10 @@ namespace Timereporter.Core
 					var roundedHours = (float)value.Hour + (float)value.Minute / (float)60 + (float)value.Second / (float)3600 + (float)value.Millisecond / (float)360000;
 					hours = roundedHours.Some();
 				});
-				return hours.Match(some: h => h.ToString("0.0"), none: () => "");
+				return hours;
 			}
 
-			string ConfidenceText(Option<(long, TimeConfidence)> unixTimestamp)
-			{
-				return unixTimestamp.ValueOr((0, TimeConfidence.None)).Item2.ToString();
-			}
-
-			IEnumerable<WorkdayDetailsDto> RereduceTime()
+			IEnumerable<WorkdayDto> RereduceTime()
 			{
 				foreach (var r in reduceDate)
 				{
@@ -110,25 +105,38 @@ namespace Timereporter.Core
 					// No break for now. No use of Summarize either
 					arrival.MatchSome(a => departure.MatchSome(d => total = (d.Item1 - a.Item1).Some()));
 
-					yield return new WorkdayDetailsDto
+					yield return new WorkdayDto
 					{
 						Date = r.Date.DateText(),
 						ArrivalHours = RoundHours(arrival),
-						ArrivalConfidence = ConfidenceText(arrival),
-						BreakHours = "",
+						ArrivalConfidence = arrival.ValueOr((0, TimeConfidence.None)).Item2,
+						BreakHours = Option.None<float>(),
 						DepartureHours = RoundHours(departure),
-						DepartureConfidence = ConfidenceText(departure),
-						Total = total.Match(some: v => (v / (float) (60 * 60000)).ToString("0.0"), none: () => "")
+						DepartureConfidence = departure.ValueOr((0, TimeConfidence.None)).Item2
 					};
 				}
 			}
 
 			// System.Diagnostics.Debugger.Break();
 
-			return new Workdays
+			return RereduceTime().ToList();
+		}
+
+		public static IEnumerable<WorkdayDetailsDto> ToWorkdayDetails(this IEnumerable<WorkdayDto> workday)
+		{
+			foreach(var wd in workday)
 			{
-				List = RereduceTime().ToList()
-			};
+				yield return new WorkdayDetailsDto
+				{
+					Date = wd.Date,
+					ArrivalHours = wd.ArrivalHours.Match(some: t => t.ToString("0.0"), () => ""),
+					ArrivalConfidence = wd.ArrivalConfidence.ToString(),
+					BreakHours = wd.ArrivalHours.Match(some: t => t.ToString("0.0"), () => ""),
+					DepartureHours = wd.DepartureHours.Match(some: t => t.ToString("0.0"), () => ""),
+					DepartureConfidence = wd.DepartureConfidence.ToString(),
+					Total = Total(wd).Match(some: t => t.ToString("0.0"), () => "")
+				};
+			}
 		}
 
 		public static IEnumerable<List<Event>> Chunkmap(this Dictionary<string, Time> times)
@@ -143,7 +151,7 @@ namespace Timereporter.Core
 					events.Clear();
 				}
 
-				// TODO: Replace with Some(Action<>) me thinks
+				// TODO: Replace with Some(Action<>) me thinks. Also use workday reporting instead of events. Also push events rather.
 				t.Value.Source.MatchSome(source =>
 				{
 					t.Value.Min.MatchSome(some: min => events.Add(new Event($"{source}_MIN", min)));
@@ -204,22 +212,18 @@ namespace Timereporter.Core
 			}
 		}
 
-		public static Option<float> SummarizeWorkday(this WorkdayDto workday)
+		public static Option<float> Total(this WorkdayDto workday)
 		{
-			if (workday.DepartureHours.HasValue && workday.ArrivalHours.HasValue)
+			void GetTotal(float arrival, float departure, Option<float> @break, out Option<float> t)
 			{
-				float total = workday.DepartureHours.Value;
-				total -= workday.ArrivalHours.Value;
-				
-				if (workday.BreakHours.HasValue)
-				{
-					total -= workday.BreakHours.Value;
-				}
-
-				return total.Some();
+				float total_ = departure - arrival;
+				@break.MatchSome(b => total_ -= b);
+				t = total_.Some();
 			}
 
-			return Option.None<float>();
+			var total = Option.None<float>();
+			workday.ArrivalHours.MatchSome(a => workday.DepartureHours.MatchSome(d => GetTotal(a, d, workday.BreakHours, out total)));
+			return total;
 		}
 
 		public static Dictionary<LocalDate, int> GetEuropeanWeeks(this int year)

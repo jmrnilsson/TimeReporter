@@ -17,7 +17,8 @@ namespace Timereporter.Core
 			IEnumerable<WorkdayDetailsDto> Enumerate_()
 			{
 				var workdays = WorkdayHelper.Range(year, month);
-				var workdayKvp = EnumerableExtensions.ToWorkdays(events, tz).List;
+				var workdayKvp_ = EnumerableExtensions.ToWorkdays(events, tz);
+				var workdayKvp = workdayKvp_.ToWorkdayDetails();
 				var workKvp = workdayKvp.ToDictionary(wd => wd.Date);
 				var weeks = EnumerableExtensions.GetEuropeanWeeks(year);
 

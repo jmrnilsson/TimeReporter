@@ -52,9 +52,9 @@ namespace Timereporter.Api.Collections
 				var query0 =
 					query.Select(wd => new WorkdayDto
 					{
-						ArrivalHours = wd.ArrivalMilliseconds / (float)60000,
-						DepartureHours = wd.ArrivalMilliseconds / (float)60000,
-						BreakHours = wd.BreakMilliseconds / (float)60000,
+						ArrivalHours = wd.ArrivalMilliseconds.SomeNotNull().Map(m => (float) m / 60000) ,
+						DepartureHours = wd.DepartureMilliseconds.SomeNotNull().Map(d => (float)d / 60000),
+						BreakHours = wd.BreakMilliseconds.SomeNotNull().Map(b => (float)b/ 60000),
 						Date = wd.Date,
 						Changed = wd.Changed.ToUnixDateTimeMilliseconds()
 					});
@@ -80,9 +80,9 @@ namespace Timereporter.Api.Collections
 				var option = db.Workdays.SingleOrNone(c => c.Date == value.Date);
 				var model = option.ValueOr(() => Create(db));
 				model.Changed = now;
-				model.ArrivalMilliseconds = (int) value.ArrivalHours * 60000;
-				model.BreakMilliseconds = (int) value.BreakHours * 60000;
-				model.DepartureMilliseconds = (int)value.DepartureHours * 60000;
+				value.ArrivalHours.Match(some: a => model.ArrivalMilliseconds = (int)a * 60000, none: () => model.ArrivalMilliseconds = null);
+				value.BreakHours.Match(some: b => model.BreakMilliseconds = (int)b * 60000, none: () => model.BreakMilliseconds = null);
+				value.DepartureHours.Match(some: b => model.DepartureMilliseconds = (int)b * 60000, none: () => model.DepartureMilliseconds = null);
 				db.SaveChanges();
 			}
 		}
