@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using Timereporter.Core.Collections;
 using Timereporter.Core.Models;
 
 namespace Timereporter.Core
@@ -172,21 +174,20 @@ namespace Timereporter.Core
 				for (int i = 0; start.AddDays(i) < end.AddDays(1); i++)
 				{
 					var date = start.AddDays(i);
-					yield return new Workday(new Date(date), 0, 0, 0);
+					yield return new Workday(new LocalDate(date.Year, date.Month, date.Day), 0, 0, 0);
 				}
 			}
 
 			return EnumerateWorkdays_().ToArray();
 		}
 
-		public static Date[] DateRange(Date from, Date to)
+		public static LocalDate[] DateRange(LocalDate from, LocalDate to)
 		{
-			IEnumerable<Date> EnumerateDates_()
+			IEnumerable<LocalDate> EnumerateDates_()
 			{
-				for (int i = 0; from.With(i) < to.With(1); i++)
+				for (int i = 0; from.PlusDays(i) < to.PlusDays(1); i++)
 				{
-					var date = from.With(i);
-					yield return new Date(date);
+					yield return from.PlusDays(i);
 				}
 			}
 
@@ -311,6 +312,68 @@ namespace Timereporter.Core
 		{
 			var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
 			return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+		}
+
+		public static Dictionary<string, Time> ToSummarizedWorkdays(this List<IEventLogEntryProxy> entries_, LocalDate fromDate_, LocalDate toDate_, string pattern_, bool fill)
+		{
+			IEnumerable<Time> Summarize(List<IEventLogEntryProxy> entries, LocalDate fromDate, LocalDate toDate, string pattern)
+			{
+				DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+				Instant now = SystemClock.Instance.GetCurrentInstant();
+
+				return
+					from e in entries
+					where Regex.IsMatch(e.Source, pattern)
+					orderby e.TimeWritten ascending
+					group e by new { Date = new LocalDate(e.TimeWritten.Year, e.TimeWritten.Month, e.TimeWritten.Day), e.Source } into eg
+					where !eg.Key.Date.IsWeekend()
+					where eg.Key.Date >= fromDate
+					where eg.Key.Date <= toDate
+					select new Time
+					(
+						eg.Key.Date,
+						eg.Key.Source,
+						eg.Min(e => e.TimeWritten),
+						eg.Max(e => e.TimeWritten),
+						tz
+					);
+			}
+
+			Time ShimGetValueOrDefault(Dictionary<string, Time> collection, string key, Time @default)
+			{
+				if (collection.ContainsKey(key))
+				{
+					return collection[key];
+				}
+				return @default;
+			}
+
+			IEnumerable<Time> Fill(IEnumerable<Time> minMaxList, LocalDate from, LocalDate to)
+			{
+				Dictionary<string, Time> kvp = minMaxList.ToDictionary(mm => mm.Date, mm => mm);
+
+				foreach (LocalDate date in EnumerableExtensions.DateRange(from, to))
+				{
+					yield return ShimGetValueOrDefault(kvp, new DateText(date).ToString(), new Time(date, Option.None<string>(), Option.None<Instant>(), Option.None<Instant>()));
+				}
+			}
+
+			var summary = Summarize(entries_, fromDate_, toDate_, pattern_);
+
+			if (fill)
+			{
+				summary = Fill(summary, fromDate_, toDate_);
+			}
+
+			return summary.ToDictionary(mm => mm.Date, mm => mm);
+
+		}
+
+		public static bool IsWeekend(this LocalDate localDate)
+		{
+			return localDate.DayOfWeek == IsoDayOfWeek.Sunday
+				|| localDate.DayOfWeek == IsoDayOfWeek.Saturday
+				|| OfficialHolidays.List.Any(oh => oh.Equals(localDate));
 		}
 	}
 }

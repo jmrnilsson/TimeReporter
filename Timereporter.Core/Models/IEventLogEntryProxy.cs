@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Timereporter.EventLogTask.Proxies
+namespace Timereporter.Core.Models
 {
 	public interface IEventLogEntryProxy
 	{

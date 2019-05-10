@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodaTime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Timereporter.Core.Models;
@@ -8,7 +9,7 @@ namespace Timereporter.Core.Models
 
 	public class Workday : IWorkday
 	{
-		private readonly Date date;
+		private readonly LocalDate date;
 		private int arrival;
 		private int @break;
 		private int departure;
@@ -19,7 +20,7 @@ namespace Timereporter.Core.Models
 
 		}
 
-		public Workday(Date date, int arrival, int @break, int departure)
+		public Workday(LocalDate date, int arrival, int @break, int departure)
 		{
 			this.date = date;
 			this.arrival = arrival;
@@ -30,16 +31,16 @@ namespace Timereporter.Core.Models
 
 		public Workday(DateTime date, int arrival, int @break, int departure)
 		{
-			this.date = new Date(date);
+			this.date = new LocalDate(date.Year, date.Month, date.Day);
 			this.arrival = arrival;
 			this.@break = @break;
 			this.departure = departure;
 			otherDays = new List<Workday>();
 		}
 
-		public string DayOfWeekText => date.DayOfWeek();
+		public string DayOfWeekText => date.DayOfWeek.ToString();
 
-		public string DateText => date.ToString();
+		public string DateText => new DateText(date).ToString();
 
 		public string ArrivalText => arrival.ToString();
 
@@ -62,10 +63,11 @@ namespace Timereporter.Core.Models
 			}
 		}
 
-		public bool Is(DayOfWeek dayOfWeek)
+		public bool Is(IsoDayOfWeek dayOfWeek)
 		{
-			return date.Is(dayOfWeek);
+			return date.DayOfWeek == dayOfWeek;
 		}
+
 		public bool IsWeekend()
 		{
 			return date.IsWeekend();

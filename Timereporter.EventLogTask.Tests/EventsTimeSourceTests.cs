@@ -6,6 +6,7 @@ using Timereporter.Core.Models;
 using Timereporter.EventLogTask.Proxies;
 using Xunit;
 using Moq;
+using NodaTime;
 
 namespace Timereporter.EventLogTask.Tests
 {
@@ -25,7 +26,7 @@ namespace Timereporter.EventLogTask.Tests
 		[Fact]
 		public void Results_Matches_Specified_Range_Exactly_Keep_Regular_Weekends_With_Fill()
 		{
-			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 11), new Date(2011, 11, 21), fill: true));
+			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new LocalDate(2011, 11, 11), new LocalDate(2011, 11, 21), fill: true));
 
 			Assert.True(actual.ContainsKey("2011-11-11"));
 			Assert.True(actual.ContainsKey("2011-11-18"));
@@ -44,7 +45,7 @@ namespace Timereporter.EventLogTask.Tests
 		[Fact]
 		public void Results_Matches_Specified_Range_Exactly_No_Regular_Weekends()
 		{
-			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2011, 11, 10), new Date(2011, 11, 21)));
+			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new LocalDate(2011, 11, 10), new LocalDate(2011, 11, 21)));
 
 			Assert.True(actual.ContainsKey("2011-11-18"));
 			Assert.False(actual.ContainsKey("2011-11-12"));  // Saturday
@@ -55,7 +56,7 @@ namespace Timereporter.EventLogTask.Tests
 		public void Results_Matches_Specified_Range_Exactly_No_Official_Holidays()
 		{
 			tracker = new EventLogTracker(MakeEventLogFactory(2019, 4, 18));
-			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new Date(2019, 4, 18), new Date(2019, 4, 30)));
+			var actual = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", new LocalDate(2019, 4, 18), new LocalDate(2019, 4, 30)));
 
 			Assert.True(actual.ContainsKey("2019-04-18"));
 			Assert.False(actual.ContainsKey("2019-04-19"));
@@ -85,8 +86,8 @@ namespace Timereporter.EventLogTask.Tests
 		//private static IDateTimeValueFactory MakeDateTimeValueFactoryMock(int year = startYear, int month = startMonth, int day = startDay)
 		//{
 		//	Mock<IDateTimeValueFactory> mock = new Mock<IDateTimeValueFactory>();
-		//	DateTime start_ = new DateTime(year, month, day);
-		//	mock.Setup(m => m.LocalToday(It.IsAny<int>())).Returns(new Date(start_.AddDays(-22)));
+		//	DateTime start_ = new LocalDateTime(year, month, day);
+		//	mock.Setup(m => m.LocalToday(It.IsAny<int>())).Returns(new LocalDate(start_.AddDays(-22)));
 		//	return mock.Object;
 		//}
 
