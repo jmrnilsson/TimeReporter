@@ -34,12 +34,14 @@ namespace Timereporter.EventLogTask
 			LocalDate from = new LocalDate(2019, 1, 1);
 			// WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
 			LocalDate to = SystemClock.Instance.GetCurrentInstant().InZone(dtz).Date;
-			Dictionary<string, Time> minMaxes = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", from, to, fill: true));
-
+			var query = new EventLogQuery("^ESENT$", "Application", from, to, fill: true);
+			var entries = tracker.FindBy(query);
+			var minMaxes = entries.ToSummarizedWorkdays(query.From, query.To, query.Pattern, query.Fill);
 
 			Console.WriteLine("done!\r\n");
 			Console.WriteLine(PrintConsoleTable(minMaxes));
 			Console.WriteLine("Synchronizing results..");
+			ApiClient.PostEvents(entries, dtz);
 			ApiClient.PostEvents(minMaxes);
 			Console.WriteLine("done!\r\n");
 			Console.WriteLine("Press any key to close.");

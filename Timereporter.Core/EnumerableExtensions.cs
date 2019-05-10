@@ -159,6 +159,30 @@ namespace Timereporter.Core
 			yield return events;
 		}
 
+		public static IEnumerable<List<Event>> Chunkmap(this IEnumerable<Event> entries)
+		{
+			List<Event> events = new List<Event>();
+
+			foreach (var t in entries)
+			{
+				if (events.Count > 99)
+				{
+					yield return events;
+					events = new List<Event>();
+				}
+
+				// TODO: Replace with Some(Action<>) me thinks. Also use workday reporting instead of events. Also push events rather.
+				events.Add(t);
+			}
+			yield return events;
+		}
+
+		public static IEnumerable<Event> MapToEvents(this IEnumerable<IEventLogEntryProxy> entries, DateTimeZone dtz)
+		{
+			return entries.Select(e => new Event(e.Source, EnumerableExtensions.ToInstantFromLocal(e.TimeWritten, dtz, true)));
+		}
+
+
 
 		public static IWorkday[] WorkdayRange(int year, int month)
 		{
@@ -375,5 +399,34 @@ namespace Timereporter.Core
 				|| localDate.DayOfWeek == IsoDayOfWeek.Saturday
 				|| OfficialHolidays.List.Any(oh => oh.Equals(localDate));
 		}
+
+		public static Instant ToInstantFromLocal(DateTime dt, DateTimeZone timeZone, bool assert = false)
+		{
+			bool LocalDateTimeEquals(DateTime x, LocalDateTime y)
+			{
+				return x.Year == y.Year
+					&& x.Month == y.Month
+					&& x.Day == y.Day
+					&& x.Second == y.Second
+					&& x.Millisecond == y.Millisecond;
+			}
+
+			LocalDateTime localDateTime = new LocalDateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
+			ZonedDateTime dateTimeZoned = localDateTime.InZoneLeniently(timeZone);
+			Instant instant = dateTimeZoned.ToInstant();
+
+			if (assert)
+			{
+				var dateTimeZoned_ = instant.InZone(timeZone);
+				LocalDateTime localDateTime_ = dateTimeZoned_.LocalDateTime;
+				if (!LocalDateTimeEquals(dt, localDateTime_))
+				{
+					throw new ArgumentException($"{nameof(ToInstantFromLocal)}: Reverse datetime-conversion test failed.");
+				}
+			}
+
+			return instant;
+		}
+
 	}
 }

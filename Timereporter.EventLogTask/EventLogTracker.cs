@@ -24,11 +24,10 @@ namespace Timereporter.EventLogTask
 			this.eventLog = eventLog;
 		}
 
-		public Dictionary<string, Time> FindBy(EventLogQuery query)
+		public List<IEventLogEntryProxy> FindBy(EventLogQuery query)
 		{
 			eventLog.Log = query.LogName;
-			List<IEventLogEntryProxy> entries = eventLog.Entries.ToList(ReportProgress, e => Regex.IsMatch(e.Source, query.Pattern));
-			return entries.ToSummarizedWorkdays(query.From, query.To, query.Pattern, query.Fill);
+			return eventLog.Entries.ToList(ReportProgress, e => Regex.IsMatch(e.Source, query.Pattern));
 		}
 
 		private void ReportProgress(int i, IEventLogEntryProxy e)

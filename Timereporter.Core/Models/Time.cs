@@ -26,8 +26,8 @@ namespace Timereporter.Core.Models
 			this.source = source.Some();
 			if (timeZone != null)
 			{
-				this.min = ToInstantFromLocal(min, timeZone, assert: true).Some();
-				this.max = ToInstantFromLocal(max, timeZone, assert: true).Some();
+				this.min = EnumerableExtensions.ToInstantFromLocal(min, timeZone, assert: true).Some();
+				this.max = EnumerableExtensions.ToInstantFromLocal(max, timeZone, assert: true).Some();
 			}
 			else
 			{
@@ -49,34 +49,6 @@ namespace Timereporter.Core.Models
 			this.source = source;
 			this.min = min;
 			this.max = max;
-		}
-
-		private Instant ToInstantFromLocal(DateTime dt, DateTimeZone timeZone, bool assert = false)
-		{
-			LocalDateTime localDateTime = new LocalDateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
-			ZonedDateTime dateTimeZoned = localDateTime.InZoneLeniently(timeZone);
-			Instant instant = dateTimeZoned.ToInstant();
-
-			if (assert)
-			{
-				var dateTimeZoned_ = instant.InZone(timeZone);
-				LocalDateTime localDateTime_ = dateTimeZoned_.LocalDateTime;
-				if (!LocalDateTimeEquals(dt, localDateTime_))
-				{
-					throw new ArgumentException($"{nameof(ToInstantFromLocal)}: Reverse datetime-conversion test failed.");
-				}
-			}
-
-			return instant;
-		}
-
-		public bool LocalDateTimeEquals(DateTime x, LocalDateTime y)
-		{
-			return x.Year == y.Year
-				&& x.Month == y.Month
-				&& x.Day == y.Day
-				&& x.Second == y.Second
-				&& x.Millisecond == y.Millisecond;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NodaTime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +53,35 @@ namespace Timereporter.Core
 			{
 				throw new ApplicationException("esent rest");
 			}
+		}
+
+		public static void PostEvents(List<IEventLogEntryProxy> entries, DateTimeZone dtz)
+		{
+			var chunks = entries.MapToEvents(dtz).Distinct(new EventEqualityComparer()).Chunkmap().ToList();
+
+			using (var client = new HttpClient())
+			{
+				client.DefaultRequestHeaders.Clear();
+				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+				foreach (var chunk in chunks)
+				{
+					Post(client, chunk);
+				}
+			}
+		}
+	}
+
+	public class EventEqualityComparer : IEqualityComparer<Event>
+	{
+		public bool Equals(Event x, Event y)
+		{
+			return x.Kind == y.Kind && x.Timestamp == y.Timestamp;
+		}
+
+		public int GetHashCode(Event obj)
+		{
+			return $"{obj.Kind}:{obj.Timestamp}".ToFnv1aHashInt32();
 		}
 	}
 }
