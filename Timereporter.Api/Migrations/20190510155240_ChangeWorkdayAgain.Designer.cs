@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Timereporter.Api.Models;
 
 namespace Timereporter.Api.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190510155240_ChangeWorkdayAgain")]
+    partial class ChangeWorkdayAgain
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,13 +63,13 @@ namespace Timereporter.Api.Migrations
 
                     b.Property<DateTime>("Added");
 
-                    b.Property<long?>("Arrival");
+                    b.Property<int?>("ArrivalMilliseconds");
 
-                    b.Property<long?>("Break");
+                    b.Property<int?>("BreakMilliseconds");
 
                     b.Property<DateTime>("Changed");
 
-                    b.Property<long?>("Departure");
+                    b.Property<int?>("DepartureMilliseconds");
 
                     b.HasKey("Date", "Kind");
 

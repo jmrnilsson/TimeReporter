@@ -16,15 +16,15 @@ namespace Timereporter.Core
 		{
 			IEnumerable<WorkdayDetailsDto> Enumerate_()
 			{
-				var workdays = WorkdayHelper.Range(year, month);
+				var everyDay = WorkdayHelper.Range(year, month);
 				var workdayKvp_ = EnumerableExtensions.ToWorkdays(events, tz);
 				var workdayKvp = workdayKvp_.ToWorkdayDetails();
 				var workKvp = workdayKvp.ToDictionary(wd => wd.Date);
 				var weeks = EnumerableExtensions.GetEuropeanWeeks(year);
 
-				for (int i = 0; i < workdays.Count; i++)
+				for (int i = 0; i < everyDay.Count; i++)
 				{
-					IWorkday wd = workdays[i];
+					IWorkday wd = everyDay[i];
 					DateTime localDateTime = DateTime.ParseExact(wd.DateText, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 					LocalDate localDate = new LocalDate(localDateTime.Year, localDateTime.Month, localDateTime.Day);
 					if (workKvp.ContainsKey(wd.DateText) && !wd.IsWeekend())

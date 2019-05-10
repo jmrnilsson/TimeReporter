@@ -49,17 +49,17 @@ namespace Timereporter.Api.Collections
 					select wd
 				).ToList();
 
-				var query0 =
-					query.Select(wd => new WorkdayDto
-					{
-						ArrivalHours = wd.ArrivalMilliseconds.SomeNotNull().Map(m => (float) m / 60000) ,
-						DepartureHours = wd.DepartureMilliseconds.SomeNotNull().Map(d => (float)d / 60000),
-						BreakHours = wd.BreakMilliseconds.SomeNotNull().Map(b => (float)b/ 60000),
-						Date = wd.Date,
-						Changed = wd.Changed.ToUnixDateTimeMilliseconds()
-					});
-
-				return query0.SingleOrNone();
+				//var query0 =
+					//query.Select(wd => new WorkdayDto
+					//{
+					//	ArrivalHours = wd.ArrivalMilliseconds.SomeNotNull().Map(m => (float) m / 60000) ,
+					//	DepartureHours = wd.DepartureMilliseconds.SomeNotNull().Map(d => (float)d / 60000),
+					//	BreakHours = wd.BreakMilliseconds.SomeNotNull().Map(b => (float)b/ 60000),
+					//	Date = wd.Date,
+					//	Changed = wd.Changed.ToUnixDateTimeMilliseconds()
+					//});
+				return Option.None<WorkdayDto>();
+				// return query0.SingleOrNone();
 			}
 		}
 
@@ -75,16 +75,16 @@ namespace Timereporter.Api.Collections
 				return wd;
 			}
 
-			using (DatabaseContext db = databaseContextFactory())
-			{
-				var option = db.Workdays.SingleOrNone(c => c.Date == value.Date);
-				var model = option.ValueOr(() => Create(db));
-				model.Changed = now;
-				value.ArrivalHours.Match(some: a => model.ArrivalMilliseconds = (int)a * 60000, none: () => model.ArrivalMilliseconds = null);
-				value.BreakHours.Match(some: b => model.BreakMilliseconds = (int)b * 60000, none: () => model.BreakMilliseconds = null);
-				value.DepartureHours.Match(some: b => model.DepartureMilliseconds = (int)b * 60000, none: () => model.DepartureMilliseconds = null);
-				db.SaveChanges();
-			}
+			//using (DatabaseContext db = databaseContextFactory())
+			//{
+			//	var option = db.Workdays.SingleOrNone(c => c.Date == value.Date);
+			//	var model = option.ValueOr(() => Create(db));
+			//	model.Changed = now;
+			//	value.ArrivalHours.Match(some: a => model.ArrivalMilliseconds = (int)a * 60000, none: () => model.ArrivalMilliseconds = null);
+			//	value.BreakHours.Match(some: b => model.BreakMilliseconds = (int)b * 60000, none: () => model.BreakMilliseconds = null);
+			//	value.DepartureHours.Match(some: b => model.DepartureMilliseconds = (int)b * 60000, none: () => model.DepartureMilliseconds = null);
+			//	db.SaveChanges();
+			//}
 		}
 	}
 }

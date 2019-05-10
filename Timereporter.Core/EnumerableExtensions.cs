@@ -54,8 +54,6 @@ namespace Timereporter.Core
 				select new
 				{
 					Date = eg.Key,
-					UserArrival = ReduceTime(eg, "USER_MIN", g => g.Min()),
-					UserDeparture = ReduceTime(eg, "USER_MAX", g => g.Max()),
 					EsentArrival = ReduceTime(eg, "ESENT_MIN", g => g.Min()),
 					EsentDepature = ReduceTime(eg, "ESENT_MAX", g => g.Max()),
 					OtherArrival = ReduceTime(eg, "OTHEREVENT_MIN", g => g.Min()),
@@ -92,11 +90,9 @@ namespace Timereporter.Core
 
 					// This is to messy for a worksheet update. Use CRUD approach for stored cell values.!!
 
-					arrival.MatchNone(() => r.UserArrival.MatchSome(a => arrival = (a, TimeConfidence.Certain).Some()));
 					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = (a, TimeConfidence.Confident).Some()));
 					arrival.MatchNone(() => r.OtherArrival.MatchSome(a => arrival = (a, TimeConfidence.Insecure).Some()));
 
-					departure.MatchNone(() => r.UserDeparture.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()));
 					departure.MatchNone(() => r.EsentDepature.MatchSome(a => departure = (a, TimeConfidence.Confident).Some()));
 					departure.MatchNone(() => r.OtherDepature.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()));
 					

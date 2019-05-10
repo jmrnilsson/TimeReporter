@@ -7,14 +7,16 @@ namespace Timereporter.Api.Models
 	[Table("Workdays")]
 	public class WorkdayDo
 	{
-		[Key]
 		[StringLength(10)]
 		public string Date { get; set; }
+		[StringLength(25)]
+		public string Kind { get; set; }
+		[Required]
 		public DateTime Added { get; set; }
+		[Required]
 		public DateTime Changed { get; set; }
-		public int? ArrivalMilliseconds { get; set; }
-		public int? DepartureMilliseconds { get; set; }
-		public int? BreakMilliseconds { get; set; }	
-		public long ConcurrencyToken { get; set; }
+		public long? Arrival { get; set; }
+		public long? Departure { get; set; }
+		public long? Break { get; set; }
 	}
 }
