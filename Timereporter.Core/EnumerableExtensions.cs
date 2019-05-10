@@ -129,12 +129,12 @@ namespace Timereporter.Core
 				yield return new WorkdayDetailsDto
 				{
 					Date = wd.Date,
-					ArrivalHours = wd.ArrivalHours.Match(some: t => t.ToString("0.0"), () => ""),
+					ArrivalHours = wd.ArrivalHours.Match(some: t => t.ToString("0.0"), none: () => ""),
 					ArrivalConfidence = wd.ArrivalConfidence.ToString(),
-					BreakHours = wd.ArrivalHours.Match(some: t => t.ToString("0.0"), () => ""),
-					DepartureHours = wd.DepartureHours.Match(some: t => t.ToString("0.0"), () => ""),
+					BreakHours = wd.BreakHours.Match(some: t => t.ToString("0.0"), none: () => ""),
+					DepartureHours = wd.DepartureHours.Match(some: t => t.ToString("0.0"), none: () => ""),
 					DepartureConfidence = wd.DepartureConfidence.ToString(),
-					Total = Total(wd).Match(some: t => t.ToString("0.0"), () => "")
+					Total = Total(wd).Match(some: t => t.ToString("0.0"), none: () => "")
 				};
 			}
 		}
