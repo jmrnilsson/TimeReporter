@@ -13,16 +13,35 @@ using Timereporter.Core;
 using NodaTime;
 using System.Globalization;
 using Optional;
+using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Timereporter
 {
 	public class GridMutator
 	{
 		private readonly DataGridView dgv;
+		private BindingList<WorkdayDetailsBindingListItem> workdayDetailsBindingList;
+		private BindingSource workdayBindingSource = new BindingSource();
+
 
 		public GridMutator(DataGridView dgv)
 		{
+			// https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/how-to-bind-data-to-the-windows-forms-datagridview-control
+			// https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/raise-change-notifications--bindingsource
+			// https://stackoverflow.com/questions/9758577/c-sharp-datagridview-not-updated-when-datasource-is-changed
 			this.dgv = dgv;
+			this.workdayDetailsBindingList = new BindingList<WorkdayDetailsBindingListItem>();
+
+			for(int i = 0; i < 31; i++)
+			{
+				this.workdayDetailsBindingList.Add(new WorkdayDetailsBindingListItem());
+			}
+
+			this.workdayBindingSource.DataSource = this.workdayDetailsBindingList;
+			this.dgv.DataSource = workdayBindingSource;
+			var autoCols = this.dgv.AutoGenerateColumns; // = true;
+			// this.dgv.Databind	()
 		}
 
 		public void Load(ComboBox comboBox1)
@@ -50,10 +69,11 @@ namespace Timereporter
 
 		public void Load(Option<LocalDate> yearMonthOption)
 		{
-			dgv.Rows.Clear();
+			// dgv.Rows.Clear();
 
 			Color lgray = Color.FromArgb(255, 240, 240, 240);
 			Color lred = Color.FromArgb(255, 255, 244, 244);
+			Color colorWhite = Color.FromArgb(255, 255, 255, 255);
 
 			LocalDate localDate = yearMonthOption.ValueOr(delegate ()
 			{
@@ -65,41 +85,74 @@ namespace Timereporter
 			var workdays = GetData(localDate.Year, localDate.Month).ToList();
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
-			for (int i = 0; i < workdays.Count; i++)
+			for(int i = 0; i < workdayDetailsBindingList.Count; i++)
 			{
-				var wd = workdays[i];
-
-				dgv.Rows.Add
-				(
-					wd.Date,
-					wd.DayOfWeek,
-					wd.ArrivalHours,
-					wd.BreakHours,
-					wd.DepartureHours,
-					wd.Total
-				);
-
-				if (Enum.TryParse(wd.ArrivalConfidence, out TimeConfidence arrivalConfidence))
+				var item = workdayDetailsBindingList[i];
+				if (i < workdays.Count)
 				{
-					if (arrivalConfidence == TimeConfidence.Confident)
+					var wd = workdays[i];
+					item.ArrivalHours = wd.ArrivalHours;
+					item.BreakHours = wd.BreakHours;
+					item.DepartureHours = wd.DepartureHours;
+					item.DayOfWeek = wd.DayOfWeek;
+					item.Total = wd.Total;
+					item.WeekNumber = wd.WeekNumber;
+					item.Date = wd.Date;
+
+					if (Enum.TryParse(wd.ArrivalConfidence, out TimeConfidence arrivalConfidence))
 					{
-						dgv.Rows[i].Cells[2].Style.BackColor = lred;
+						if (arrivalConfidence == TimeConfidence.Confident)
+						{
+							dgv.Rows[i].Cells[2].Style.BackColor = lred;
+						}
+					}
+
+					if (Enum.TryParse(wd.DepartureConfidence, out TimeConfidence departureConfidence))
+					{
+						if (departureConfidence == TimeConfidence.Confident)
+						{
+							dgv.Rows[i].Cells[4].Style.BackColor = lred;
+						}
+					}
+
+					if (wd.IsWeekend)
+					{
+						dgv.Rows[i].DefaultCellStyle.BackColor = lgray;
+					}
+				}
+				else
+				{
+
+					item.ArrivalHours = null;
+					item.BreakHours = null;
+					item.DepartureHours = null;
+					item.DayOfWeek = null;
+					item.Total = null;
+					item.WeekNumber = null;
+					item.Date = null;
+
+					try
+					{
+						dgv.Rows[i].Cells[2].Style.BackColor = colorWhite;
+						dgv.Rows[i].Cells[4].Style.BackColor = colorWhite;
+						dgv.Rows[i].DefaultCellStyle.BackColor = colorWhite;
+					}
+					catch(Exception e)
+					{
+						var ee = e;
+						Debugger.Break();
 					}
 				}
 
-				if (Enum.TryParse(wd.DepartureConfidence, out TimeConfidence departureConfidence))
-				{
-					if (departureConfidence == TimeConfidence.Confident)
-					{
-						dgv.Rows[i].Cells[4].Style.BackColor = lred;
-					}
-				}
-
-
-				if (wd.IsWeekend)
-				{
-					dgv.Rows[i].DefaultCellStyle.BackColor = lgray;
-				}
+				//dgv.Rows.Add
+				//(
+				//	wd.Date,
+				//	wd.DayOfWeek,
+				//	wd.ArrivalHours,
+				//	wd.BreakHours,
+				//	wd.DepartureHours,
+				//	wd.Total
+				//);
 
 				//dgv.Rows[i].Cells[0].Value = wd.Date;
 				//dgv.Rows[i].Cells[1].Value = wd.DayOfWeek;

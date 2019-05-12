@@ -1,7 +1,9 @@
 ﻿using Optional;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Forms;
+using Timereporter.Core.Models;
 
 namespace Timereporter
 {
@@ -9,12 +11,16 @@ namespace Timereporter
 	{
 		private GridActor _gridActor;
 		private GridMutator _mutator;
+		private BindingSource bindingSource;
 
+		// https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/how-to-bind-data-to-the-windows-forms-datagridview-control
 		public Form1()
 		{
 			InitializeComponent();
 			_gridActor = new GridActor(dataGridView1);
 			_mutator = new GridMutator(dataGridView1);
+			bindingSource = new BindingSource();
+
 			comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
 			LoadData();
 		}

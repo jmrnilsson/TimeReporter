@@ -45,17 +45,13 @@ namespace Timereporter.Core
 					}
 					else
 					{
-						yield return new WorkdayDetailsDto
-						{
-							Date = wd.DateText,
-							DayOfWeek = wd.DayOfWeekText,
-							ArrivalHours = "",
-							BreakHours = "",
-							DepartureHours = "",
-							Total = "",
-							IsWeekend = wd.IsWeekend(),
-							WeekNumber = weeks[localDate]
-						};
+						yield return WorkdayDetailsDtoExtensions.Empty
+						(
+							wd.DateText,
+							wd.DayOfWeekText,
+							wd.IsWeekend(),
+							weeks[localDate]
+						);
 					}
 				}
 			}

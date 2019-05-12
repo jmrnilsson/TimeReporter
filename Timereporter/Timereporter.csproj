@@ -70,6 +70,8 @@
     </Compile>
     <Compile Include="GridActor.cs" />
     <Compile Include="GridMutator.cs" />
+    <Compile Include="HttpClientDataAdapter.cs" />
+    <Compile Include="HttpClientTableMappings.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
