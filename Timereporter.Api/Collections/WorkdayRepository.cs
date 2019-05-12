@@ -38,7 +38,7 @@ namespace Timereporter.Api.Collections
 			}
 		}
 
-		public Option<WorkdayDto> FindByKey(string date)
+		public Option<WorkdayDto> Find(string date)
 		{
 			using (DatabaseContext db = databaseContextFactory())
 			{

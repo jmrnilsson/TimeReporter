@@ -154,24 +154,8 @@ namespace Timereporter
 						Debugger.Break();
 					}
 				}
-
-				this.dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
-
-				//dgv.Rows.Add
-				//(
-				//	wd.Date,
-				//	wd.DayOfWeek,
-				//	wd.ArrivalHours,
-				//	wd.BreakHours,
-				//	wd.DepartureHours,
-				//	wd.Total
-				//);
-
-				//dgv.Rows[i].Cells[0].Value = wd.Date;
-				//dgv.Rows[i].Cells[1].Value = wd.DayOfWeek;
 			}
-
-			// Use pre-defined columns instead `dgv.DataSource = data.Workdays`;
+			this.dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
 		}
 
 		public IEnumerable<WorkdayDetailsDto> GetData(int year, int month)

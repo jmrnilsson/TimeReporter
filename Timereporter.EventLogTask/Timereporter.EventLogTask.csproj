@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Timereporter.Api\Timereporter.Api.csproj" />
     <ProjectReference Include="..\Timereporter.Core\Timereporter.Core.csproj" />
   </ItemGroup>
 

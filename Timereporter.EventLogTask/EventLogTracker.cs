@@ -4,16 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Timereporter.Api.Collections;
 using Timereporter.Core;
-using Timereporter.Core.Collections;
 using Timereporter.Core.Models;
-using Timereporter.EventLogTask.Proxies;
 
 namespace Timereporter.EventLogTask
 {
 	public delegate void ProgressChanged();
 
-	public class EventLogTracker
+	public class EventLogTracker : ICollectionReader<IEventLogEntryProxy, EventLogQuery>
 	{
 		private const int reportProgressBy = 1000;
 		private readonly IEventLogProxy eventLog;
@@ -24,7 +23,7 @@ namespace Timereporter.EventLogTask
 			this.eventLog = eventLog;
 		}
 
-		public List<IEventLogEntryProxy> FindBy(EventLogQuery query)
+		public List<IEventLogEntryProxy> Find(EventLogQuery query)
 		{
 			eventLog.Log = query.LogName;
 			return eventLog.Entries.ToList(ReportProgress, e => Regex.IsMatch(e.Source, query.Pattern));

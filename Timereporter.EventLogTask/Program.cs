@@ -35,7 +35,7 @@ namespace Timereporter.EventLogTask
 			// WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
 			LocalDate to = SystemClock.Instance.GetCurrentInstant().InZone(dtz).Date;
 			var query = new EventLogQuery("^ESENT$", "Application", from, to, fill: true);
-			var entries = tracker.FindBy(query);
+			var entries = tracker.Find(query);
 			var minMaxes = entries.ToSummarizedWorkdays(query.From, query.To, query.Pattern, query.Fill);
 
 			Console.WriteLine("done!\r\n");
