@@ -36,14 +36,6 @@
 			this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
 			this.button1 = new System.Windows.Forms.Button();
 			this.dataGridView1 = new System.Windows.Forms.DataGridView();
-			this.Date = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.DayOfWeek = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.Arrival = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.Break = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.Departure = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.Total = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.Report = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.Week = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.comboBox1 = new System.Windows.Forms.ComboBox();
 			this.contextMenuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -93,65 +85,12 @@
 			// dataGridView1
 			// 
 			this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Date,
-            this.DayOfWeek,
-            this.Arrival,
-            this.Break,
-            this.Departure,
-            this.Total,
-            this.Report,
-            this.Week});
 			this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.dataGridView1.Location = new System.Drawing.Point(0, 129);
 			this.dataGridView1.Name = "dataGridView1";
 			this.dataGridView1.RowTemplate.Height = 28;
 			this.dataGridView1.Size = new System.Drawing.Size(1122, 1230);
 			this.dataGridView1.TabIndex = 3;
-			// 
-			// Date
-			// 
-			this.Date.HeaderText = "Date";
-			this.Date.Name = "Date";
-			this.Date.ReadOnly = true;
-			// 
-			// DayOfWeek
-			// 
-			this.DayOfWeek.HeaderText = "Day of week";
-			this.DayOfWeek.Name = "DayOfWeek";
-			this.DayOfWeek.ReadOnly = true;
-			// 
-			// Arrival
-			// 
-			this.Arrival.HeaderText = "Arrival";
-			this.Arrival.Name = "Arrival";
-			// 
-			// Break
-			// 
-			this.Break.HeaderText = "Break";
-			this.Break.Name = "Break";
-			// 
-			// Departure
-			// 
-			this.Departure.HeaderText = "Departure";
-			this.Departure.Name = "Departure";
-			// 
-			// Total
-			// 
-			this.Total.HeaderText = "Total (H)";
-			this.Total.Name = "Total";
-			this.Total.ReadOnly = true;
-			// 
-			// Report
-			// 
-			this.Report.HeaderText = "Report (H)";
-			this.Report.Name = "Report";
-			// 
-			// Week
-			// 
-			this.Week.HeaderText = "Week (H)";
-			this.Week.Name = "Week";
-			this.Week.ReadOnly = true;
 			// 
 			// comboBox1
 			// 
@@ -189,14 +128,6 @@
         private System.Windows.Forms.NotifyIcon notifyIcon1;
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.DataGridView dataGridView1;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Date;
-		private System.Windows.Forms.DataGridViewTextBoxColumn DayOfWeek;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Arrival;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Break;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Departure;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Total;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Report;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Week;
 		private System.Windows.Forms.ComboBox comboBox1;
 	}
 }

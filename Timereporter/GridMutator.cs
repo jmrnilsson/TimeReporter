@@ -27,6 +27,7 @@ namespace Timereporter
 
 		public GridMutator(DataGridView dgv)
 		{
+			// https://stackoverflow.com/questions/13395321/change-column-name-in-datagridview
 			// https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/how-to-bind-data-to-the-windows-forms-datagridview-control
 			// https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/raise-change-notifications--bindingsource
 			// https://stackoverflow.com/questions/9758577/c-sharp-datagridview-not-updated-when-datasource-is-changed
@@ -40,8 +41,13 @@ namespace Timereporter
 
 			this.workdayBindingSource.DataSource = this.workdayDetailsBindingList;
 			this.dgv.DataSource = workdayBindingSource;
-			var autoCols = this.dgv.AutoGenerateColumns; // = true;
-			// this.dgv.Databind	()
+
+			this.dgv.Columns[0].HeaderText = "Date";
+			this.dgv.Columns[1].HeaderText = "Day of week";
+			this.dgv.Columns[2].HeaderText = "Arrival";
+			this.dgv.Columns[3].HeaderText = "Break";
+			this.dgv.Columns[4].HeaderText = "Depature";
+			this.dgv.Columns[5].HeaderText = "Total (H)";
 		}
 
 		public void Load(ComboBox comboBox1)
@@ -71,9 +77,8 @@ namespace Timereporter
 		{
 			// dgv.Rows.Clear();
 
-			Color lgray = Color.FromArgb(255, 240, 240, 240);
-			Color lred = Color.FromArgb(255, 255, 244, 244);
-			Color colorWhite = Color.FromArgb(255, 255, 255, 255);
+			Color lightGray = Color.FromArgb(255, 240, 240, 240);
+			Color lightRed = Color.FromArgb(255, 255, 244, 244);
 
 			LocalDate localDate = yearMonthOption.ValueOr(delegate ()
 			{
@@ -99,25 +104,31 @@ namespace Timereporter
 					item.WeekNumber = wd.WeekNumber;
 					item.Date = wd.Date;
 
-					if (Enum.TryParse(wd.ArrivalConfidence, out TimeConfidence arrivalConfidence))
+					if (Enum.TryParse(wd.ArrivalConfidence, out TimeConfidence arrivalConfidence) && arrivalConfidence == TimeConfidence.Confident)
 					{
-						if (arrivalConfidence == TimeConfidence.Confident)
-						{
-							dgv.Rows[i].Cells[2].Style.BackColor = lred;
-						}
+						dgv.Rows[i].Cells[2].Style.BackColor = lightRed;
+					}
+					else if (dgv.Rows[i].Cells[2].Style.BackColor != Color.Empty)
+					{
+						dgv.Rows[i].Cells[2].Style.BackColor = Color.Empty;
 					}
 
-					if (Enum.TryParse(wd.DepartureConfidence, out TimeConfidence departureConfidence))
+					if (Enum.TryParse(wd.DepartureConfidence, out TimeConfidence departureConfidence) && departureConfidence == TimeConfidence.Confident)
 					{
-						if (departureConfidence == TimeConfidence.Confident)
-						{
-							dgv.Rows[i].Cells[4].Style.BackColor = lred;
-						}
+						dgv.Rows[i].Cells[4].Style.BackColor = lightRed;
+					}
+					else if (dgv.Rows[i].Cells[4].Style.BackColor != Color.Empty)
+					{
+						dgv.Rows[i].Cells[4].Style.BackColor = Color.Empty;
 					}
 
 					if (wd.IsWeekend)
 					{
-						dgv.Rows[i].DefaultCellStyle.BackColor = lgray;
+						dgv.Rows[i].DefaultCellStyle.BackColor = lightGray;
+					}
+					else if (dgv.Rows[i].DefaultCellStyle.BackColor != Color.Empty)
+					{
+						dgv.Rows[i].DefaultCellStyle.BackColor = Color.Empty;
 					}
 				}
 				else
@@ -133,9 +144,9 @@ namespace Timereporter
 
 					try
 					{
-						dgv.Rows[i].Cells[2].Style.BackColor = colorWhite;
-						dgv.Rows[i].Cells[4].Style.BackColor = colorWhite;
-						dgv.Rows[i].DefaultCellStyle.BackColor = colorWhite;
+						dgv.Rows[i].Cells[2].Style.BackColor = Color.Empty;
+						dgv.Rows[i].Cells[4].Style.BackColor = Color.Empty;
+						dgv.Rows[i].DefaultCellStyle.BackColor = Color.Empty;
 					}
 					catch(Exception e)
 					{
@@ -143,6 +154,8 @@ namespace Timereporter
 						Debugger.Break();
 					}
 				}
+
+				this.dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
 
 				//dgv.Rows.Add
 				//(
