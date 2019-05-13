@@ -13,4 +13,29 @@
 		public bool IsWeekend { get; set; }
 		public int WeekNumber { get; set; }
 	}
+
+	public static class WorkdayDetailsDtoExtensions
+	{
+		public static WorkdayDetailsDto Empty
+		(
+			string sateText,
+			string dayOfWeekText,
+			bool isWeekend,
+			int weekNumber
+		)
+		{
+			return new WorkdayDetailsDto
+			{
+				Date = sateText,
+				DayOfWeek = dayOfWeekText,
+				ArrivalHours = "",
+				BreakHours = "",
+				DepartureHours = "",
+				Total = "",
+				IsWeekend = isWeekend,
+				WeekNumber = weekNumber
+			};
+		}
+
+	}
 }

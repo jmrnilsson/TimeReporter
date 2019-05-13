@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using Timereporter.Core.Collections;
 using Timereporter.Core.Models;
 
 namespace Timereporter.Core
@@ -54,8 +56,6 @@ namespace Timereporter.Core
 				select new
 				{
 					Date = eg.Key,
-					UserArrival = ReduceTime(eg, "USER_MIN", g => g.Min()),
-					UserDeparture = ReduceTime(eg, "USER_MAX", g => g.Max()),
 					EsentArrival = ReduceTime(eg, "ESENT_MIN", g => g.Min()),
 					EsentDepature = ReduceTime(eg, "ESENT_MAX", g => g.Max()),
 					OtherArrival = ReduceTime(eg, "OTHEREVENT_MIN", g => g.Min()),
@@ -92,11 +92,9 @@ namespace Timereporter.Core
 
 					// This is to messy for a worksheet update. Use CRUD approach for stored cell values.!!
 
-					arrival.MatchNone(() => r.UserArrival.MatchSome(a => arrival = (a, TimeConfidence.Certain).Some()));
 					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = (a, TimeConfidence.Confident).Some()));
 					arrival.MatchNone(() => r.OtherArrival.MatchSome(a => arrival = (a, TimeConfidence.Insecure).Some()));
 
-					departure.MatchNone(() => r.UserDeparture.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()));
 					departure.MatchNone(() => r.EsentDepature.MatchSome(a => departure = (a, TimeConfidence.Confident).Some()));
 					departure.MatchNone(() => r.OtherDepature.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()));
 					
@@ -129,12 +127,12 @@ namespace Timereporter.Core
 				yield return new WorkdayDetailsDto
 				{
 					Date = wd.Date,
-					ArrivalHours = wd.ArrivalHours.Match(some: t => t.ToString("0.0"), () => ""),
+					ArrivalHours = wd.ArrivalHours.Match(some: t => t.ToString("0.0"), none: () => ""),
 					ArrivalConfidence = wd.ArrivalConfidence.ToString(),
-					BreakHours = wd.ArrivalHours.Match(some: t => t.ToString("0.0"), () => ""),
-					DepartureHours = wd.DepartureHours.Match(some: t => t.ToString("0.0"), () => ""),
+					BreakHours = wd.BreakHours.Match(some: t => t.ToString("0.0"), none: () => ""),
+					DepartureHours = wd.DepartureHours.Match(some: t => t.ToString("0.0"), none: () => ""),
 					DepartureConfidence = wd.DepartureConfidence.ToString(),
-					Total = Total(wd).Match(some: t => t.ToString("0.0"), () => "")
+					Total = Total(wd).Match(some: t => t.ToString("0.0"), none: () => "")
 				};
 			}
 		}
@@ -161,6 +159,30 @@ namespace Timereporter.Core
 			yield return events;
 		}
 
+		public static IEnumerable<List<Event>> Chunkmap(this IEnumerable<Event> entries)
+		{
+			List<Event> events = new List<Event>();
+
+			foreach (var t in entries)
+			{
+				if (events.Count > 99)
+				{
+					yield return events;
+					events = new List<Event>();
+				}
+
+				// TODO: Replace with Some(Action<>) me thinks. Also use workday reporting instead of events. Also push events rather.
+				events.Add(t);
+			}
+			yield return events;
+		}
+
+		public static IEnumerable<Event> MapToEvents(this IEnumerable<IEventLogEntryProxy> entries, DateTimeZone dtz)
+		{
+			return entries.Select(e => new Event(e.Source, EnumerableExtensions.ToInstantFromLocal(e.TimeWritten, dtz, true)));
+		}
+
+
 
 		public static IWorkday[] WorkdayRange(int year, int month)
 		{
@@ -176,21 +198,20 @@ namespace Timereporter.Core
 				for (int i = 0; start.AddDays(i) < end.AddDays(1); i++)
 				{
 					var date = start.AddDays(i);
-					yield return new Workday(new Date(date), 0, 0, 0);
+					yield return new Workday(new LocalDate(date.Year, date.Month, date.Day), 0, 0, 0);
 				}
 			}
 
 			return EnumerateWorkdays_().ToArray();
 		}
 
-		public static Date[] DateRange(Date from, Date to)
+		public static LocalDate[] DateRange(LocalDate from, LocalDate to)
 		{
-			IEnumerable<Date> EnumerateDates_()
+			IEnumerable<LocalDate> EnumerateDates_()
 			{
-				for (int i = 0; from.With(i) < to.With(1); i++)
+				for (int i = 0; from.PlusDays(i) < to.PlusDays(1); i++)
 				{
-					var date = from.With(i);
-					yield return new Date(date);
+					yield return from.PlusDays(i);
 				}
 			}
 
@@ -316,5 +337,96 @@ namespace Timereporter.Core
 			var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
 			return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
 		}
+
+		public static Dictionary<string, Time> ToSummarizedWorkdays(this List<IEventLogEntryProxy> entries_, LocalDate fromDate_, LocalDate toDate_, string pattern_, bool fill)
+		{
+			IEnumerable<Time> Summarize(List<IEventLogEntryProxy> entries, LocalDate fromDate, LocalDate toDate, string pattern)
+			{
+				DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+				Instant now = SystemClock.Instance.GetCurrentInstant();
+
+				return
+					from e in entries
+					where Regex.IsMatch(e.Source, pattern)
+					orderby e.TimeWritten ascending
+					group e by new { Date = new LocalDate(e.TimeWritten.Year, e.TimeWritten.Month, e.TimeWritten.Day), e.Source } into eg
+					where !eg.Key.Date.IsWeekend()
+					where eg.Key.Date >= fromDate
+					where eg.Key.Date <= toDate
+					select new Time
+					(
+						eg.Key.Date,
+						eg.Key.Source,
+						eg.Min(e => e.TimeWritten),
+						eg.Max(e => e.TimeWritten),
+						tz
+					);
+			}
+
+			Time ShimGetValueOrDefault(Dictionary<string, Time> collection, string key, Time @default)
+			{
+				if (collection.ContainsKey(key))
+				{
+					return collection[key];
+				}
+				return @default;
+			}
+
+			IEnumerable<Time> Fill(IEnumerable<Time> minMaxList, LocalDate from, LocalDate to)
+			{
+				Dictionary<string, Time> kvp = minMaxList.ToDictionary(mm => mm.Date, mm => mm);
+
+				foreach (LocalDate date in EnumerableExtensions.DateRange(from, to))
+				{
+					yield return ShimGetValueOrDefault(kvp, new DateText(date).ToString(), new Time(date, Option.None<string>(), Option.None<Instant>(), Option.None<Instant>()));
+				}
+			}
+
+			var summary = Summarize(entries_, fromDate_, toDate_, pattern_);
+
+			if (fill)
+			{
+				summary = Fill(summary, fromDate_, toDate_);
+			}
+
+			return summary.ToDictionary(mm => mm.Date, mm => mm);
+
+		}
+
+		public static bool IsWeekend(this LocalDate localDate)
+		{
+			return localDate.DayOfWeek == IsoDayOfWeek.Sunday
+				|| localDate.DayOfWeek == IsoDayOfWeek.Saturday
+				|| OfficialHolidays.List.Any(oh => oh.Equals(localDate));
+		}
+
+		public static Instant ToInstantFromLocal(DateTime dt, DateTimeZone timeZone, bool assert = false)
+		{
+			bool LocalDateTimeEquals(DateTime x, LocalDateTime y)
+			{
+				return x.Year == y.Year
+					&& x.Month == y.Month
+					&& x.Day == y.Day
+					&& x.Second == y.Second
+					&& x.Millisecond == y.Millisecond;
+			}
+
+			LocalDateTime localDateTime = new LocalDateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
+			ZonedDateTime dateTimeZoned = localDateTime.InZoneLeniently(timeZone);
+			Instant instant = dateTimeZoned.ToInstant();
+
+			if (assert)
+			{
+				var dateTimeZoned_ = instant.InZone(timeZone);
+				LocalDateTime localDateTime_ = dateTimeZoned_.LocalDateTime;
+				if (!LocalDateTimeEquals(dt, localDateTime_))
+				{
+					throw new ArgumentException($"{nameof(ToInstantFromLocal)}: Reverse datetime-conversion test failed.");
+				}
+			}
+
+			return instant;
+		}
+
 	}
 }

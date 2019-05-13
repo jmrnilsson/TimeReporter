@@ -7,6 +7,7 @@ using Timereporter.Core.Collections;
 
 namespace Timereporter.Core.Models
 {
+
 	public struct Date : IEquatable<Date>, IComparable<Date>
 	{
 		private readonly int year;
@@ -68,13 +69,6 @@ namespace Timereporter.Core.Models
 		public bool Is(DayOfWeek dayOfWeek)
 		{
 			return date.DayOfWeek == dayOfWeek;
-		}
-
-		public bool IsWeekend()
-		{
-			return Is(System.DayOfWeek.Sunday)
-				|| Is(System.DayOfWeek.Saturday)
-				|| OfficialHolidays.List.Any(Equals);
 		}
 
 		public bool Equals(Date other)

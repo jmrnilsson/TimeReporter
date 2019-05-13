@@ -26,18 +26,22 @@ namespace Timereporter.EventLogTask
 		static void Main(string[] args)
 		{
 			RegisterServices(container.Value);
+			DateTimeZone dtz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
 
 			var tracker = container.Value.GetInstance<EventLogTracker>();
 			tracker.OnProgressChanged += Tracker_OnProgressChanged;
 			var dateTimeValueFactory = container.Value.GetInstance<IDateTimeValueFactory>();
-			Date from = new Date(2019, 1, 1); // WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
-			Date to = dateTimeValueFactory.LocalToday();
-			Dictionary<string, Time> minMaxes = tracker.FindBy(new EventLogQuery("^ESENT$", "Application", from, to, fill: true));
-
+			LocalDate from = new LocalDate(2019, 1, 1);
+			// WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
+			LocalDate to = SystemClock.Instance.GetCurrentInstant().InZone(dtz).Date;
+			var query = new EventLogQuery("^ESENT$", "Application", from, to, fill: true);
+			var entries = tracker.Find(query);
+			var minMaxes = entries.ToSummarizedWorkdays(query.From, query.To, query.Pattern, query.Fill);
 
 			Console.WriteLine("done!\r\n");
 			Console.WriteLine(PrintConsoleTable(minMaxes));
 			Console.WriteLine("Synchronizing results..");
+			ApiClient.PostEvents(entries, dtz);
 			ApiClient.PostEvents(minMaxes);
 			Console.WriteLine("done!\r\n");
 			Console.WriteLine("Press any key to close.");

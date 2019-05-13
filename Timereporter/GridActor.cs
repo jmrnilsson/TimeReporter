@@ -29,6 +29,11 @@ namespace Timereporter
 		{
 			Option<string> GetEventName()
 			{
+				if (e.RowIndex < 0)
+				{
+					return Option.None<string>();
+				}
+
 				switch (e.ColumnIndex)
 				{
 					case 4: return "USER_MAX".Some();

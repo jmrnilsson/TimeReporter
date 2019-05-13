@@ -39,7 +39,7 @@ namespace Timereporter.Api.Controllers
 		[HttpGet("{cursorType}")]
 		public IActionResult Get(string cursorType)
 		{
-			var option = cursors.FindByKey(cursorType);
+			var option = cursors.Find(cursorType);
 			return option.Match<IActionResult>(some: c => Ok(c), none: () => NotFound(cursorType));
 		}
 	}

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodaTime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,9 @@ namespace Timereporter.Core.Collections
 {
 	public static class OfficialHolidays
 	{
-		private static readonly Lazy<IReadOnlyList<Date>> lazy = new Lazy<IReadOnlyList<Date>>(() => EnumerateHolidays());
+		private static readonly Lazy<IReadOnlyList<LocalDate>> lazy = new Lazy<IReadOnlyList<LocalDate>>(() => EnumerateHolidays());
 
-		private static IReadOnlyList<Date> EnumerateHolidays()
+		private static IReadOnlyList<LocalDate> EnumerateHolidays()
 		{
 			(int Year, int Month, int Day)[] holidays = new (int Year, int Month, int Day)[]
 			{
@@ -43,10 +44,10 @@ namespace Timereporter.Core.Collections
 				(2025, 12, 26)
 			};
 
-			return holidays.Select(oh => new Date(oh.Year, oh.Month, oh.Day)).ToArray();
+			return holidays.Select(oh => new LocalDate(oh.Year, oh.Month, oh.Day)).ToArray();
 		}
 
-		public static IReadOnlyList<Date> List
+		public static IReadOnlyList<LocalDate> List
 		{
 			get { return lazy.Value; }
 		}

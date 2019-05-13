@@ -36,7 +36,7 @@ namespace Timereporter.Api.Collections
 			}
 		}
 
-		public Option<Cursor> FindByKey(string cursorType)
+		public Option<Cursor> Find(string cursorType)
 		{
 			using (DatabaseContext db = dataContextFactory())
 			{

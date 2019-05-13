@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Timereporter.Core.Models;
 
 namespace Timereporter.EventLogTask.Proxies
 {

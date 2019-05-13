@@ -13,47 +13,78 @@ using Timereporter.Core;
 using NodaTime;
 using System.Globalization;
 using Optional;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Timereporter
 {
 	public class GridMutator
 	{
 		private readonly DataGridView dgv;
+		private BindingList<WorkdayDetailsBindingListItem> workdayDetailsBindingList;
+		private BindingSource workdayBindingSource = new BindingSource();
+		private long lastDataBindMillisecond;
+
 
 		public GridMutator(DataGridView dgv)
 		{
+			// https://stackoverflow.com/questions/13395321/change-column-name-in-datagridview
+			// https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/how-to-bind-data-to-the-windows-forms-datagridview-control
+			// https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/raise-change-notifications--bindingsource
+			// https://stackoverflow.com/questions/9758577/c-sharp-datagridview-not-updated-when-datasource-is-changed
 			this.dgv = dgv;
+			dgv.DataBindingComplete += Dgv_DataBindingComplete;
+
+			this.workdayDetailsBindingList = new BindingList<WorkdayDetailsBindingListItem>();
+
+			for(int i = 0; i < 31; i++)
+			{
+				this.workdayDetailsBindingList.Add(new WorkdayDetailsBindingListItem());
+			}
+
+			this.workdayBindingSource.DataSource = this.workdayDetailsBindingList;
+			this.dgv.DataSource = workdayBindingSource;
+
+			this.dgv.Columns[0].HeaderText = "Date";
+			this.dgv.Columns[1].HeaderText = "Day of week";
+			this.dgv.Columns[2].HeaderText = "Arrival";
+			this.dgv.Columns[3].HeaderText = "Break";
+			this.dgv.Columns[4].HeaderText = "Depature";
+			this.dgv.Columns[5].HeaderText = "Total (H)";
+		}
+
+		private void Dgv_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+		{
+			lastDataBindMillisecond = SystemClock.Instance.GetCurrentInstant().ToUnixTimeMilliseconds();
 		}
 
 		public void Load(ComboBox comboBox1)
 		{
-			{
-				var instant = SystemClock.Instance.GetCurrentInstant();
-				DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-				var monthRange = EnumerableExtensions.ReverseMonthRange(instant, tz, 9);
+			var instant = SystemClock.Instance.GetCurrentInstant();
+			DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+			var monthRange = EnumerableExtensions.ReverseMonthRange(instant, tz, 9);
 
-				var options =
-					from ym in monthRange
-					let readableMonth = new DateTime(ym.Year, ym.Month, 1).ToString("MMMM", CultureInfo.InvariantCulture)
-					select new DateOption
-					{
-						YearMonth = $"{ym.Year}-{ym.Month}",
-						Name = $"{ym.Year}, {readableMonth}",
-						Date = ym
-					};
+			var options =
+				from ym in monthRange
+				let readableMonth = new DateTime(ym.Year, ym.Month, 1).ToString("MMMM", CultureInfo.InvariantCulture)
+				select new DateOption
+				{
+					YearMonth = $"{ym.Year}-{ym.Month}",
+					Name = $"{ym.Year}, {readableMonth}",
+					Date = ym
+				};
 
-				comboBox1.DataSource = options.ToList();
-				comboBox1.DisplayMember = "Name";
-				comboBox1.ValueMember = "YearMonth";
-			}
+			comboBox1.DataSource = options.ToList();
+			comboBox1.DisplayMember = "Name";
+			comboBox1.ValueMember = "YearMonth";
 		}
 
 		public void Load(Option<LocalDate> yearMonthOption)
 		{
-			dgv.Rows.Clear();
 
-			Color lgray = Color.FromArgb(255, 240, 240, 240);
-			Color lred = Color.FromArgb(255, 255, 244, 244);
+			Color lightGray = Color.FromArgb(255, 240, 240, 240);
+			Color lightRed = Color.FromArgb(255, 255, 244, 244);
 
 			LocalDate localDate = yearMonthOption.ValueOr(delegate ()
 			{
@@ -65,47 +96,74 @@ namespace Timereporter
 			var workdays = GetData(localDate.Year, localDate.Month).ToList();
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
-			for (int i = 0; i < workdays.Count; i++)
+			for(int i = 0; i < workdayDetailsBindingList.Count; i++)
 			{
-				var wd = workdays[i];
-
-				dgv.Rows.Add
-				(
-					wd.Date,
-					wd.DayOfWeek,
-					wd.ArrivalHours,
-					wd.BreakHours,
-					wd.DepartureHours,
-					wd.Total
-				);
-
-				if (Enum.TryParse(wd.ArrivalConfidence, out TimeConfidence arrivalConfidence))
+				var item = workdayDetailsBindingList[i];
+				if (i < workdays.Count)
 				{
-					if (arrivalConfidence == TimeConfidence.Confident)
-					{
-						dgv.Rows[i].Cells[2].Style.BackColor = lred;
-					}
-				}
+					var wd = workdays[i];
+					item.ArrivalHours = wd.ArrivalHours;
+					item.BreakHours = wd.BreakHours;
+					item.DepartureHours = wd.DepartureHours;
+					item.DayOfWeek = wd.DayOfWeek;
+					item.Total = wd.Total;
+					item.WeekNumber = wd.WeekNumber;
+					item.Date = wd.Date;
 
-				if (Enum.TryParse(wd.DepartureConfidence, out TimeConfidence departureConfidence))
+					ApplyCellFormatting(lightGray, lightRed, i, wd);
+				}
+				else
 				{
-					if (departureConfidence == TimeConfidence.Confident)
-					{
-						dgv.Rows[i].Cells[4].Style.BackColor = lred;
-					}
+
+					item.ArrivalHours = null;
+					item.BreakHours = null;
+					item.DepartureHours = null;
+					item.DayOfWeek = null;
+					item.Total = null;
+					item.WeekNumber = null;
+					item.Date = null;
+
+					ResetCellFormatting(i);
 				}
+			}
+			this.dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+		}
 
+		private void ResetCellFormatting(int i)
+		{
+			dgv.Rows[i].Cells[2].Style.BackColor = Color.Empty;
+			dgv.Rows[i].Cells[4].Style.BackColor = Color.Empty;
+			dgv.Rows[i].DefaultCellStyle.BackColor = Color.Empty;
+		}
 
-				if (wd.IsWeekend)
-				{
-					dgv.Rows[i].DefaultCellStyle.BackColor = lgray;
-				}
-
-				//dgv.Rows[i].Cells[0].Value = wd.Date;
-				//dgv.Rows[i].Cells[1].Value = wd.DayOfWeek;
+		private void ApplyCellFormatting(Color lightGray, Color lightRed, int i, WorkdayDetailsDto wd)
+		{
+			if (Enum.TryParse(wd.ArrivalConfidence, out TimeConfidence arrivalConfidence) && arrivalConfidence == TimeConfidence.Confident)
+			{
+				dgv.Rows[i].Cells[2].Style.BackColor = lightRed;
+			}
+			else if (dgv.Rows[i].Cells[2].Style.BackColor != Color.Empty)
+			{
+				dgv.Rows[i].Cells[2].Style.BackColor = Color.Empty;
 			}
 
-			// Use pre-defined columns instead `dgv.DataSource = data.Workdays`;
+			if (Enum.TryParse(wd.DepartureConfidence, out TimeConfidence departureConfidence) && departureConfidence == TimeConfidence.Confident)
+			{
+				dgv.Rows[i].Cells[4].Style.BackColor = lightRed;
+			}
+			else if (dgv.Rows[i].Cells[4].Style.BackColor != Color.Empty)
+			{
+				dgv.Rows[i].Cells[4].Style.BackColor = Color.Empty;
+			}
+
+			if (wd.IsWeekend)
+			{
+				dgv.Rows[i].DefaultCellStyle.BackColor = lightGray;
+			}
+			else if (dgv.Rows[i].DefaultCellStyle.BackColor != Color.Empty)
+			{
+				dgv.Rows[i].DefaultCellStyle.BackColor = Color.Empty;
+			}
 		}
 
 		public IEnumerable<WorkdayDetailsDto> GetData(int year, int month)

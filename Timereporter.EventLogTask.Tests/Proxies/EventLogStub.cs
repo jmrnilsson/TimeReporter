@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Timereporter.Core.Models;
 
 namespace Timereporter.EventLogTask.Proxies
 {

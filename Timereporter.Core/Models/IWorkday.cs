@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodaTime;
+using System;
 
 namespace Timereporter.Core.Models
 {
@@ -11,7 +12,7 @@ namespace Timereporter.Core.Models
 		string DepatureText { get; }
 		int Week { get; }
 		int Total { get; }
-		bool Is(DayOfWeek dayOfWeek);
+		bool Is(IsoDayOfWeek dayOfWeek);
 		bool IsWeekend();
 	}
 }
