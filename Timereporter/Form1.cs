@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows.Forms;
 using Timereporter.Core.Models;
 
@@ -17,12 +18,6 @@ namespace Timereporter
 		public Form1()
 		{
 			InitializeComponent();
-			_gridActor = new GridActor(dataGridView1);
-			_mutator = new GridMutator(dataGridView1);
-			bindingSource = new BindingSource();
-
-			comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-			LoadData();
 		}
 
 		private void ShowToolStripMenuItem_Click(object sender, EventArgs e)
@@ -54,6 +49,12 @@ namespace Timereporter
 		private void LoadData()
 		{
 			_mutator.Load(comboBox1);
+			//var monthOption = comboBox1.SelectedItem as DateOption;
+			//monthOption.SomeNotNull().MatchSome(o => _mutator.Load(o.Date.Some()));
+
+			//Thread.Sleep(1000);
+			//monthOption.SomeNotNull().MatchSome(o => _mutator.Load(o.Date.Some()));
+			_mutator.DeferredLoad();
 		}
 
 		private void Button1_Click(object sender, EventArgs e)
@@ -61,11 +62,21 @@ namespace Timereporter
 			LoadData();
 		}
 
-		private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+		private void ComboBox1_SelectionChangeCommitted(object sender, EventArgs e)
 		{
 			var comboBox = sender as ComboBox;
 			var monthOption = comboBox.SelectedItem as DateOption;
 			monthOption.SomeNotNull().MatchSome(o => _mutator.Load(o.Date.Some()));
+		}
+
+		private void Form1_Load(object sender, EventArgs e)
+		{
+			_gridActor = new GridActor(dataGridView1);
+			_mutator = new GridMutator(dataGridView1);
+			bindingSource = new BindingSource();
+
+			comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
+			LoadData();
 		}
 	}
 }
