@@ -42,8 +42,8 @@ namespace Timereporter.Api.Controllers
 			return Ok(workdays_);
 		}
 
-		[HttpGet("arrival/{minutes:int}")]
-		public IActionResult Get(int minutes)
+		[HttpPost("calculate")]
+		public IActionResult Calculate()
 		{
 			throw new NotImplementedException();
 			//var tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
