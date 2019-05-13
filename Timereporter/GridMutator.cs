@@ -80,26 +80,6 @@ namespace Timereporter
 			comboBox1.ValueMember = "YearMonth";
 		}
 
-		public void DeferredLoad()
-		{
-			var loadStarted = SystemClock.Instance.GetCurrentInstant();
-			while (SystemClock.Instance.GetCurrentInstant().ToUnixTimeMilliseconds() - lastDataBindMillisecond > 1000)
-			{
-				var now = SystemClock.Instance.GetCurrentInstant();
-				if (now.ToUnixTimeSeconds() - loadStarted.ToUnixTimeSeconds() > 5)
-				{
-					break;
-				}
-				Thread.Sleep(100);
-			}
-
-			var instant = SystemClock.Instance.GetCurrentInstant();
-			DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-			var monthRange = EnumerableExtensions.ReverseMonthRange(instant, tz, 1);
-
-			Load(monthRange.First().Some());
-		}
-
 		public void Load(Option<LocalDate> yearMonthOption)
 		{
 

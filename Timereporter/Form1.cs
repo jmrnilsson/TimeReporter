@@ -49,24 +49,11 @@ namespace Timereporter
 		private void LoadData()
 		{
 			_mutator.Load(comboBox1);
-			//var monthOption = comboBox1.SelectedItem as DateOption;
-			//monthOption.SomeNotNull().MatchSome(o => _mutator.Load(o.Date.Some()));
-
-			//Thread.Sleep(1000);
-			//monthOption.SomeNotNull().MatchSome(o => _mutator.Load(o.Date.Some()));
-			_mutator.DeferredLoad();
 		}
 
 		private void Button1_Click(object sender, EventArgs e)
 		{
 			LoadData();
-		}
-
-		private void ComboBox1_SelectionChangeCommitted(object sender, EventArgs e)
-		{
-			var comboBox = sender as ComboBox;
-			var monthOption = comboBox.SelectedItem as DateOption;
-			monthOption.SomeNotNull().MatchSome(o => _mutator.Load(o.Date.Some()));
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
@@ -77,6 +64,13 @@ namespace Timereporter
 
 			comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
 			LoadData();
+		}
+
+		private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			var comboBox = sender as ComboBox;
+			var monthOption = comboBox.SelectedItem as DateOption;
+			monthOption.SomeNotNull().MatchSome(o => _mutator.Load(o.Date.Some()));
 		}
 	}
 }
