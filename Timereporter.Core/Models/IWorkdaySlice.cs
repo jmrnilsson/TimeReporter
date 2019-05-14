@@ -1,6 +1,6 @@
 ﻿using Optional;
 
-namespace Timereporter.Core
+namespace Timereporter.Core.Models
 {
 	public interface IWorkdaySlice
 	{

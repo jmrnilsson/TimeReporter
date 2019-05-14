@@ -30,7 +30,7 @@ namespace Timereporter.Core
 			return Fnv1a(bytes);
 		}
 
-		public static string ToFnv1aHashInt32(this string text)
+		public static string ToFnv1aHash(this string text)
 		{
 			string Fnv1a(byte[] bytes_)
 			{

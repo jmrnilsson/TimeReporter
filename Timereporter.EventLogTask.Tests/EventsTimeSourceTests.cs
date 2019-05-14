@@ -7,6 +7,7 @@ using Timereporter.EventLogTask.Proxies;
 using Xunit;
 using Moq;
 using NodaTime;
+using Timereporter.Core.Reducers;
 
 namespace Timereporter.EventLogTask.Tests
 {

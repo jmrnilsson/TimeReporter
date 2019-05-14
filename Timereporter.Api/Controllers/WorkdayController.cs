@@ -10,6 +10,7 @@ using NodaTime;
 using Timereporter.Api.Collections;
 using Timereporter.Core;
 using Timereporter.Core.Models;
+using Timereporter.Core.Reducers;
 
 namespace Timereporter.Api.Controllers
 {
@@ -18,13 +19,11 @@ namespace Timereporter.Api.Controllers
     public class WorkdayController : ControllerBase
     {
 		private readonly WorkdayRepository workdays;
-		private readonly WorkdaySummarizer workdaySummarizer;
 		private readonly IEventPersistentLog eventPersistentLog;
 
-		public WorkdayController(WorkdayRepository workdays, WorkdaySummarizer workdaySummarizer, IEventPersistentLog eventPersistentLog)
+		public WorkdayController(WorkdayRepository workdays, IEventPersistentLog eventPersistentLog)
 		{
 			this.workdays = workdays;
-			this.workdaySummarizer = workdaySummarizer;
 			this.eventPersistentLog = eventPersistentLog;
 		}
 
@@ -41,7 +40,7 @@ namespace Timereporter.Api.Controllers
 			var fromLocalDate = tz.AtStartOfDay(new LocalDate(year, month, 1));
 			var exclusiveToLocalDate = tz.AtStartOfDay(new LocalDate(year, month, DateTime.DaysInMonth(year, month)).PlusDays(1));
 			List<Event> wd = workdays.Find(fromLocalDate.ToInstant(), exclusiveToLocalDate.ToInstant());
-			var workdays_ = workdaySummarizer.Summarize(year, month, wd, tz);
+			var workdays_ = WorkdayReducer.ToWorkdayList(year, month, wd, tz);
 			return Ok(workdays_);
 		}
 
@@ -56,8 +55,7 @@ namespace Timereporter.Api.Controllers
 			var fromSomeLocalDateToInstant = tz.AtStartOfDay(new LocalDate(2018, 10, 1)).ToInstant();
 			var now = SystemClock.Instance.GetCurrentInstant();
 			var events = eventPersistentLog.FindBy((fromSomeLocalDateToInstant, now));
-			WorkdayCalculator calculator = new WorkdayCalculator();
-			var workdaySlices = calculator.CalculateWorkdays(events, tz);
+			var workdaySlices = events.ToWorkdaySlices(tz);
 			workdays.Save(workdaySlices.ToList());
 			return Ok();
 		}

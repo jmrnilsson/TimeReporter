@@ -7,22 +7,22 @@ using System.Text;
 using Timereporter.Core.Collections;
 using Timereporter.Core.Models;
 
-namespace Timereporter.Core
+namespace Timereporter.Core.Reducers
 {
-	public class WorkdaySummarizer
+	public static class WorkdayReducer
 	{
 
-		public Models.Workdays Summarize(int year, int month, List<Event> events, DateTimeZone tz)
+		public static Workdays ToWorkdayList(int year, int month, List<Event> events, DateTimeZone tz)
 		{
 			IEnumerable<WorkdayDetailsDto> Enumerate_()
 			{
-				var everyDay = WorkdayHelper.Range(year, month);
+				var everyDay = EnumerableExtensions.WorkdayRange(year, month);
 				var workdayKvp_ = EnumerableExtensions.ToWorkdays(events, tz);
 				var workdayKvp = workdayKvp_.ToWorkdayDetails();
 				var workKvp = workdayKvp.ToDictionary(wd => wd.Date);
 				var weeks = EnumerableExtensions.GetEuropeanWeeks(year);
 
-				for (int i = 0; i < everyDay.Count; i++)
+				for (int i = 0; i < everyDay.Length; i++)
 				{
 					IWorkday wd = everyDay[i];
 					DateTime localDateTime = DateTime.ParseExact(wd.DateText, "yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -56,8 +56,7 @@ namespace Timereporter.Core
 				}
 			}
 
-			return new Models.Workdays { List = Enumerate_().ToList() };
-
+			return new Workdays { List = Enumerate_().ToList() };
 		}
 	}
 }

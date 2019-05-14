@@ -44,7 +44,6 @@ namespace Timereporter.Api
 			services.AddScoped<ICursorRepository, CursorRepository>();
 			services.AddScoped<IEventPersistentLog, EventPersistentLog>();
 			services.AddScoped<WorkdayRepository>();
-			services.AddScoped<WorkdaySummarizer>();
 		}
 
 		private static DatabaseContext DatabaseContextFactory()
