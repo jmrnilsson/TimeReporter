@@ -8,7 +8,7 @@ namespace Timereporter.Api.Collections
 
 	public interface IRepository<T, TKey>
 	{
-		void Save(T value);
+		// void Save(T value);
 		Option<T> Find(TKey key);
 	}
 }

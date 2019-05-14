@@ -23,7 +23,7 @@ namespace Timereporter.Api.Models
 					.HasKey(c => new { c.Date, c.Kind });
 
 			//modelBuilder.Entity<WorkdayDo>()
-			//	.Property(p => p.ConcurrencyToken)
+			//	.Property(p => p.HashCode)
 			//	.IsConcurrencyToken();
 		}
 	}

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Timereporter.Api.Collections;
 using Timereporter.Core.Models;
 using Optional;
+using System;
 
 namespace Timereporter.Api.Controllers
 {
@@ -28,7 +29,8 @@ namespace Timereporter.Api.Controllers
 		[HttpPatch("{cursorType}/{position:long}")]
 		public void AddOrUpdate(string cursorType, long position)
 		{
-			cursors.Save(new Cursor(cursorType, position));
+			throw new NotImplementedException();
+			// cursors.Save(new Cursor(cursorType, position));
 		}
 
 		/// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -18,11 +19,13 @@ namespace Timereporter.Api.Controllers
     {
 		private readonly WorkdayRepository workdays;
 		private readonly WorkdaySummarizer workdaySummarizer;
+		private readonly IEventPersistentLog eventPersistentLog;
 
-		public WorkdayController(WorkdayRepository workdays, WorkdaySummarizer workdaySummarizer)
+		public WorkdayController(WorkdayRepository workdays, WorkdaySummarizer workdaySummarizer, IEventPersistentLog eventPersistentLog)
 		{
 			this.workdays = workdays;
 			this.workdaySummarizer = workdaySummarizer;
+			this.eventPersistentLog = eventPersistentLog;
 		}
 
 		/// <summary>
@@ -42,15 +45,21 @@ namespace Timereporter.Api.Controllers
 			return Ok(workdays_);
 		}
 
+		/// <summary>
+		///  Example: curl -d "" -X POST http://localhost:53762/api/workday/calculate
+		/// </summary>
+		/// <returns></returns>
 		[HttpPost("calculate")]
 		public IActionResult Calculate()
 		{
-			throw new NotImplementedException();
-			//var tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-			//var fromLocalDate = tz.AtStartOfDay(new LocalDate(year, month, 1));
-			//var exclusiveToLocalDate = tz.AtStartOfDay(new LocalDate(year, month, DateTime.DaysInMonth(year, month)).PlusDays(1));
-			//var wd = workdays.Find(fromLocalDate.ToInstant(), exclusiveToLocalDate.ToInstant());
-			//return Ok(Extensions.ToWorkdays(wd, tz));
+			var tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+			var fromSomeLocalDateToInstant = tz.AtStartOfDay(new LocalDate(2018, 10, 1)).ToInstant();
+			var now = SystemClock.Instance.GetCurrentInstant();
+			var events = eventPersistentLog.FindBy((fromSomeLocalDateToInstant, now));
+			WorkdayCalculator calculator = new WorkdayCalculator();
+			var workdaySlices = calculator.CalculateWorkdays(events, tz);
+			workdays.Save(workdaySlices.ToList());
+			return Ok();
 		}
 	}
 }

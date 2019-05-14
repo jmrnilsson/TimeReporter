@@ -30,9 +30,9 @@ namespace Timereporter.Core
 			return Fnv1a(bytes);
 		}
 
-		public static int ToFnv1aHashInt32(this string text)
+		public static string ToFnv1aHashInt32(this string text)
 		{
-			int Fnv1a(byte[] bytes_)
+			string Fnv1a(byte[] bytes_)
 			{
 				const uint offset = 0x811C9DC5;
 				const uint prime = 0x01000193;
@@ -47,8 +47,8 @@ namespace Timereporter.Core
 					}
 				}
 
-				return BitConverter.ToInt32(bytes_, 0);
-				// Convert.ToBase64String(BitConverter.GetBytes(hash));
+				//return BitConverter.ToInt32(bytes_, 0);
+				return Convert.ToBase64String(BitConverter.GetBytes(hash));
 			}
 
 			byte[] bytes = Encoding.UTF8.GetBytes(text);

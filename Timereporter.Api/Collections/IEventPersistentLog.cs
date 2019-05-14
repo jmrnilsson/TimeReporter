@@ -3,5 +3,5 @@ using NodaTime;
 
 namespace Timereporter.Api.Collections
 {
-	public interface IEventLog : IPersistentLog<(Instant, Instant), (long, long), Event> { }
+	public interface IEventPersistentLog : IPersistentLog<(Instant, Instant), (long, long), Event> { }
 }

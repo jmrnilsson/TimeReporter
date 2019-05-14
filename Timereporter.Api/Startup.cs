@@ -42,7 +42,7 @@ namespace Timereporter.Api
 			services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(ResolveConnectionString()));
 			services.AddSingleton<DatabaseContextFactoryDelegate>(DatabaseContextFactory);
 			services.AddScoped<ICursorRepository, CursorRepository>();
-			services.AddScoped<IEventLog, EventPersistentLog>();
+			services.AddScoped<IEventPersistentLog, EventPersistentLog>();
 			services.AddScoped<WorkdayRepository>();
 			services.AddScoped<WorkdaySummarizer>();
 		}

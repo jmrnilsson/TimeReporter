@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Timereporter.Api.Models;
 
 namespace Timereporter.Api.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190514002655_AddHashCodeConsisitencyToken")]
+    partial class AddHashCodeConsisitencyToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,8 +71,7 @@ namespace Timereporter.Api.Migrations
 
                     b.Property<long?>("Departure");
 
-                    b.Property<string>("HashCode")
-                        .IsRequired();
+                    b.Property<long>("HashCode");
 
                     b.HasKey("Date", "Kind");
 

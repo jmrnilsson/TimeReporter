@@ -18,5 +18,7 @@ namespace Timereporter.Api.Models
 		public long? Arrival { get; set; }
 		public long? Departure { get; set; }
 		public long? Break { get; set; }
+		[Required]
+		public string HashCode { get; set; }
 	}
 }

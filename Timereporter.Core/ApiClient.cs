@@ -81,7 +81,7 @@ namespace Timereporter.Core
 
 		public int GetHashCode(Event obj)
 		{
-			return $"{obj.Kind}:{obj.Timestamp}".ToFnv1aHashInt32();
+			return obj.Kind.GetHashCode() ^ obj.Timestamp.GetHashCode();
 		}
 	}
 }

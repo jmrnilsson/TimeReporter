@@ -8,7 +8,7 @@ using Optional;
 
 namespace Timereporter.Api.Collections
 {
-	public class EventPersistentLog : IEventLog
+	public class EventPersistentLog : IEventPersistentLog
 	{
 		private readonly DatabaseContextFactoryDelegate databaseContextFactory;
 
@@ -44,23 +44,6 @@ namespace Timereporter.Api.Collections
 			db.Add(c);
 			return c;
 		}
-
-		//public Event[] FindBy(Date query, DateTimeZone timeZone)
-		//{
-		//	var start = query.ToDateTime();
-		//	var exclusiveEnd = start.AddDays(1);
-		//	return FindBy(start, exclusiveEnd);
-		//}
-
-		//public Event[] FindBy(YearMonth query)
-		//{
-		//	int year, month;
-		//	year = query.Year;
-		//	month = query.Month;
-		//	var end = new DateTime(year, month, DateTime.DaysInMonth(year, month));
-		//	var exclusiveEnd = end.AddDays(1);
-		//	return FindBy(start, exclusiveEnd);
-		//}
 
 		public Event[] FindBy((Instant, Instant) args)
 		{

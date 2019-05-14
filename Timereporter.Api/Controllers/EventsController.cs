@@ -11,9 +11,9 @@ namespace Timereporter.Api.Controllers
 	[ApiController]
 	public class EventsController : ControllerBase
 	{
-		private readonly IEventLog events;
+		private readonly IEventPersistentLog events;
 
-		public EventsController(IEventLog events)
+		public EventsController(IEventPersistentLog events)
 		{
 			this.events = events;
 		}

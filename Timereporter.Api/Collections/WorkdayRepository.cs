@@ -63,28 +63,44 @@ namespace Timereporter.Api.Collections
 			}
 		}
 
-		public void Save(WorkdayDto value)
+		public void Save(List<IWorkdaySlice> slices)
 		{
 			var instant = SystemClock.Instance.GetCurrentInstant();
 			DateTime now = instant.ToDateTimeUtc();
 
-			WorkdayDo Create(DatabaseContext db)
+			WorkdayDo Create(DatabaseContext db, string date, string kind)
 			{
-				var wd = new WorkdayDo() { Added = now };
+				var wd = new WorkdayDo()
+				{
+					Added = now,
+					Date = date,
+					Kind = kind,
+				};
 				db.Add(wd);
 				return wd;
 			}
 
-			//using (DatabaseContext db = databaseContextFactory())
-			//{
-			//	var option = db.Workdays.SingleOrNone(c => c.Date == value.Date);
-			//	var model = option.ValueOr(() => Create(db));
-			//	model.Changed = now;
-			//	value.ArrivalHours.Match(some: a => model.ArrivalMilliseconds = (int)a * 60000, none: () => model.ArrivalMilliseconds = null);
-			//	value.BreakHours.Match(some: b => model.BreakMilliseconds = (int)b * 60000, none: () => model.BreakMilliseconds = null);
-			//	value.DepartureHours.Match(some: b => model.DepartureMilliseconds = (int)b * 60000, none: () => model.DepartureMilliseconds = null);
-			//	db.SaveChanges();
-			//}
+			using (DatabaseContext db = databaseContextFactory())
+			{
+				foreach(var slice in slices)
+				{
+					var option = db.Workdays.SingleOrNone(c => c.Date == slice.Date && c.Kind == slice.Kind);
+					var unchanged = option.Match(o => o.HashCode == slice.HashCode, () => false);
+
+					if (unchanged)
+					{
+						continue;
+					}
+
+					var model = option.ValueOr(() => Create(db, slice.Date, slice.Kind));
+					model.Changed = now;
+					model.Arrival = slice.Arrival.Match(a => a, () => (long?)null);
+					model.Break = slice.Break.Match(b => b, () => (long?)null);
+					model.Departure = slice.Departure.Match(d => d, () => (long?)null);
+					model.HashCode = slice.HashCode;
+				}
+				db.SaveChanges();
+			}
 		}
 	}
 }
