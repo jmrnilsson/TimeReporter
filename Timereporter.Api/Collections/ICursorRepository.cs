@@ -1,6 +1,11 @@
-﻿using Cursor = Timereporter.Core.Models.Cursor;
+﻿using Optional;
+using Timereporter.Core.Models;
 
 namespace Timereporter.Api.Collections
 {
-	public interface ICursorRepository : IRepository<Cursor, string> { }
+	public interface ICursorRepository
+	{
+		Option<Cursor> Find(string cursorType);
+		void Save(Cursor cursor);
+	}
 }

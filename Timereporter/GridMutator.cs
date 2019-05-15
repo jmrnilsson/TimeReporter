@@ -176,7 +176,8 @@ namespace Timereporter
 
 				var dateTimeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
 				var dtz = dateTimeZone.Id.Replace("/", "_");
-				var response = client.GetAsync($"http://localhost:53762/api/workday/{year}/{month}/{dtz}").Result;
+				var uri = $"http://localhost:53762/api/workday/{year}/{month}/{dtz}";
+				var response = client.GetAsync(uri).Result;
 
 				if (!response.IsSuccessStatusCode)
 				{

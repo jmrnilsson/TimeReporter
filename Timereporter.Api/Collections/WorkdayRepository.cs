@@ -24,8 +24,6 @@ namespace Timereporter.Api.Collections
 
 		public List<Event> Find(Instant fromDate, Instant exclusiveToDate)
 		{
-			// DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-
 			using (DatabaseContext db = databaseContextFactory())
 			{
 				IQueryable<Event> events =
@@ -50,16 +48,15 @@ namespace Timereporter.Api.Collections
 				).ToList();
 
 				//var query0 =
-					//query.Select(wd => new WorkdayDto
-					//{
-					//	ArrivalHours = wd.ArrivalMilliseconds.SomeNotNull().Map(m => (float) m / 60000) ,
-					//	DepartureHours = wd.DepartureMilliseconds.SomeNotNull().Map(d => (float)d / 60000),
-					//	BreakHours = wd.BreakMilliseconds.SomeNotNull().Map(b => (float)b/ 60000),
-					//	Date = wd.Date,
-					//	Changed = wd.Changed.ToUnixDateTimeMilliseconds()
-					//});
+				//query.Select(wd => new WorkdayDto
+				//{
+				//	ArrivalHours = wd.ArrivalMilliseconds.SomeNotNull().Map(m => (float) m / 60000) ,
+				//	DepartureHours = wd.DepartureMilliseconds.SomeNotNull().Map(d => (float)d / 60000),
+				//	BreakHours = wd.BreakMilliseconds.SomeNotNull().Map(b => (float)b/ 60000),
+				//	Date = wd.Date,
+				//	Changed = wd.Changed.ToUnixDateTimeMilliseconds()
+				//});
 				return Option.None<WorkdayDto>();
-				// return query0.SingleOrNone();
 			}
 		}
 
@@ -82,7 +79,7 @@ namespace Timereporter.Api.Collections
 
 			using (DatabaseContext db = databaseContextFactory())
 			{
-				foreach(var slice in slices)
+				foreach (var slice in slices)
 				{
 					var option = db.Workdays.SingleOrNone(c => c.Date == slice.Date && c.Kind == slice.Kind);
 					var unchanged = option.Match(o => o.HashCode == slice.HashCode, () => false);

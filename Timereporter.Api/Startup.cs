@@ -42,8 +42,9 @@ namespace Timereporter.Api
 			services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(ResolveConnectionString()));
 			services.AddSingleton<DatabaseContextFactoryDelegate>(DatabaseContextFactory);
 			services.AddScoped<ICursorRepository, CursorRepository>();
-			services.AddScoped<IEventPersistentLog, EventPersistentLog>();
-			services.AddScoped<WorkdayRepository>();
+			services.AddScoped<IEventRepository, EventRepository>();
+			services.AddScoped<IApiService, ApiService>();
+			services.AddScoped<IWorkdayRepository, WorkdayRepository>();
 		}
 
 		private static DatabaseContext DatabaseContextFactory()

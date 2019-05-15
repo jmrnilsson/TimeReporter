@@ -3,12 +3,10 @@ using Optional;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Timereporter.Core.Models;
 
 namespace Timereporter.Core.Reducers
 {
-
 	public static class WorkdaySliceReducer
 	{
 		private static long MillisecondOfDay(long unixTimestamp, DateTimeZone timeZone)
@@ -16,9 +14,8 @@ namespace Timereporter.Core.Reducers
 			return unixTimestamp.ToInstantFromUnixTimestampMilliseconds().InZone(timeZone).LocalDateTime.TickOfDay / 10000;
 		}
 
-		public static IEnumerable<IWorkdaySlice> ToWorkdaySlices(this Event[] events, DateTimeZone timeZone)
+		public static IEnumerable<IWorkdaySlice> ToWorkdaySlices(this List<Event> events, DateTimeZone timeZone)
 		{
-			
 			var reduceDate =
 				from e in events
 				group e by new { e.Timestamp.ToInstantFromUnixTimestampMilliseconds().InZone(timeZone).Date, e.Kind } into eg
@@ -33,8 +30,7 @@ namespace Timereporter.Core.Reducers
 					Kind = eg.Key.Kind,
 					Arrival = arrival.Some(),
 					Departure = departure.Some(),
-					Break = Option.None<long>(),
-					HashCode = $"{date}:{eg.Key.Kind}:{arrival}::{departure}".ToFnv1aHash()
+					Break = Option.None<long>()
 				};
 
 			return reduceDate;

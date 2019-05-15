@@ -12,6 +12,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Controllers\EventsController.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Controllers\EventsController.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

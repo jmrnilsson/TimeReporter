@@ -13,7 +13,7 @@ namespace Timereporter.EventLogTask.Tests
 {
 	public class EventLogTrackerTests : IDisposable
 	{
-		private EventLogTracker tracker;
+		private WindowsEventLogReader tracker;
 		private const int startYear = 2011;
 		private const int startMonth = 11;
 		private const int startDay = 11;
@@ -21,14 +21,14 @@ namespace Timereporter.EventLogTask.Tests
 
 		public EventLogTrackerTests()
 		{
-			tracker = new EventLogTracker(MakeEventLogFactory());
+			tracker = new WindowsEventLogReader(MakeEventLogFactory());
 		}
 
 		[Fact]
 		public void Results_Matches_Specified_Range_Exactly_Keep_Regular_Weekends_With_Fill()
 		{
 			var q = new EventLogQuery("^ESENT$", "Application", new LocalDate(2011, 11, 11), new LocalDate(2011, 11, 21), fill: true);
-			var actual0 = tracker.Find(q);
+			var actual0 = tracker.ReadAll(q);
 			var actual = actual0.ToSummarizedWorkdays(q.From, q.To, q.Pattern, q.Fill);
 
 			Assert.True(actual.ContainsKey("2011-11-11"));
@@ -49,7 +49,7 @@ namespace Timereporter.EventLogTask.Tests
 		public void Results_Matches_Specified_Range_Exactly_No_Regular_Weekends()
 		{
 			var q = new EventLogQuery("^ESENT$", "Application", new LocalDate(2011, 11, 10), new LocalDate(2011, 11, 21));
-			var actual0 = tracker.Find(q);
+			var actual0 = tracker.ReadAll(q);
 			var actual = actual0.ToSummarizedWorkdays(q.From, q.To, q.Pattern, q.Fill);
 
 			Assert.True(actual.ContainsKey("2011-11-18"));
@@ -60,9 +60,9 @@ namespace Timereporter.EventLogTask.Tests
 		[Fact]
 		public void Results_Matches_Specified_Range_Exactly_No_Official_Holidays()
 		{
-			tracker = new EventLogTracker(MakeEventLogFactory(2019, 4, 18));
+			tracker = new WindowsEventLogReader(MakeEventLogFactory(2019, 4, 18));
 			var q = new EventLogQuery("^ESENT$", "Application", new LocalDate(2019, 4, 18), new LocalDate(2019, 4, 30));
-			var actual0  = tracker.Find(q);
+			var actual0  = tracker.ReadAll(q);
 			var actual = actual0.ToSummarizedWorkdays(q.From, q.To, q.Pattern, q.Fill);
 
 			Assert.True(actual.ContainsKey("2019-04-18"));

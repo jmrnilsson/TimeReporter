@@ -23,29 +23,47 @@ namespace Timereporter.EventLogTask
 	class Program
 	{
 		private static Lazy<Container> container = new Lazy<Container>(() => new Container());
+		private const string windowsEventLogExpression = "^ESENT$";
 
 		static void Main(string[] args)
 		{
 			RegisterServices(container.Value);
+
+			Console.Write("Checking api availability..");
+			bool apiOnline = ApiClient.Ping();
+			Console.WriteLine("done!");
+
 			DateTimeZone dtz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
 
-			var tracker = container.Value.GetInstance<EventLogTracker>();
-			tracker.OnProgressChanged += Tracker_OnProgressChanged;
+			IWindowsEventLogReader windowsEventLogReader = container.Value.GetInstance<IWindowsEventLogReader>();
+			windowsEventLogReader.OnProgressChanged += Tracker_OnProgressChanged;
 			var dateTimeValueFactory = container.Value.GetInstance<IDateTimeValueFactory>();
 			LocalDate from = new LocalDate(2019, 1, 1);
-			// WorkdayHelper.GetThreeMondaysAgo(dateTimeValueFactory.LocalToday());
 			LocalDate to = SystemClock.Instance.GetCurrentInstant().InZone(dtz).Date;
-			var query = new EventLogQuery("^ESENT$", "Application", from, to, fill: true);
-			var entries = tracker.Find(query);
-			Dictionary<string, Time> minMaxes = entries.ToSummarizedWorkdays(query.From, query.To, query.Pattern, query.Fill);
 
-			Console.WriteLine("done!\r\n");
+			Console.Write("Scanning windows log for expression '{0}'..", windowsEventLogExpression);
+			var query = new EventLogQuery(windowsEventLogExpression, "Application", from, to, fill: true);
+			var entries = windowsEventLogReader.ReadAll(query);
+			Dictionary<string, Time> minMaxes = entries.ToSummarizedWorkdays(query.From, query.To, query.Pattern, query.Fill);
+			Console.WriteLine("done!");
+
 			Console.WriteLine(PrintConsoleTable(minMaxes));
-			Console.WriteLine("Synchronizing results..");
-			ApiClient.PostEvents(entries, dtz);
-			ApiClient.PostEvents(minMaxes);
-			Console.WriteLine("done!\r\n");
-			Console.WriteLine("Press any key to close.");
+
+			if (apiOnline)
+			{
+				Console.Write("Synchronizing log entries..");
+				ApiClient.PostEvents(entries, dtz);
+				Console.WriteLine("done!");
+				Console.Write("Synchronizing similified arrivals and depatures..");
+				ApiClient.PostEvents(minMaxes);
+				Console.WriteLine("done!");
+				Console.WriteLine("Press any key to close.");
+			}
+			else
+			{
+				Console.WriteLine("Skipping synchronization..");
+			}
+
 			Console.ReadKey();
 		}
 
@@ -58,7 +76,7 @@ namespace Timereporter.EventLogTask
 
 		private static void RegisterServices(Container container)
 		{
-			container.Register<EventLogTracker>();
+			container.Register<IWindowsEventLogReader, WindowsEventLogReader>();
 			container.Register<IEventLogProxy, EventLogProxy>(Lifestyle.Transient);
 			container.Register(EventLogFactory, Lifestyle.Transient); 
 			container.Register<IDateTimeValueFactory, DateTimeValueFactory>(Lifestyle.Transient);

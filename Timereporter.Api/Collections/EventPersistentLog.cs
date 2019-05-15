@@ -8,11 +8,11 @@ using Optional;
 
 namespace Timereporter.Api.Collections
 {
-	public class EventPersistentLog : IEventPersistentLog
+	public class EventRepository : IEventRepository
 	{
 		private readonly DatabaseContextFactoryDelegate databaseContextFactory;
 
-		public EventPersistentLog(DatabaseContextFactoryDelegate databaseContextFactory)
+		public EventRepository(DatabaseContextFactoryDelegate databaseContextFactory)
 		{
 			this.databaseContextFactory = databaseContextFactory;
 		}
@@ -21,7 +21,7 @@ namespace Timereporter.Api.Collections
 		{
 			using (DatabaseContext db = databaseContextFactory())
 			{
-				foreach(var e in events)
+				foreach (var e in events)
 				{
 					var option = db.Events.SingleOrDefault(c => c.Kind == e.Kind && c.Timestamp == e.Timestamp).SomeNotNull();
 					var model = option.ValueOr(() => Make(db, e.Kind, e.Timestamp));
@@ -45,22 +45,22 @@ namespace Timereporter.Api.Collections
 			return c;
 		}
 
-		public Event[] FindBy((Instant, Instant) args)
+		public List<Event> Find(Instant fromInstant, Instant toInstant)
 		{
-			return FindBy((args.Item1.ToUnixTimeMilliseconds(), args.Item2.ToUnixTimeMilliseconds()));
+			return Find(fromInstant.ToUnixTimeMilliseconds(), toInstant.ToUnixTimeMilliseconds());
 		}
 
-		public Event[] FindBy((long, long) args)
+		public List<Event> Find(long fromDate, long exclusiveToDate)
 		{
 			using (DatabaseContext db = databaseContextFactory())
 			{
 				var query =
 					from e in db.Events
-					where e.Timestamp >= args.Item1
-					where e.Timestamp < args.Item2
+					where e.Timestamp >= fromDate
+					where e.Timestamp < exclusiveToDate
 					select new Event(e.Kind, e.Timestamp);
 
-				return query.ToArray();
+				return query.ToList();
 			}
 		}
 	}

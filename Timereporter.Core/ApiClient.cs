@@ -55,6 +55,17 @@ namespace Timereporter.Core
 			}
 		}
 
+		public static bool Ping()
+		{
+			using (var client = new HttpClient())
+			{
+				client.DefaultRequestHeaders.Clear();
+				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+				var result = client.GetAsync("http://localhost:53762/api/ping").Result;
+				return result.IsSuccessStatusCode;
+			}
+		}
+
 		public static void PostEvents(List<IEventLogEntryProxy> entries, DateTimeZone dtz)
 		{
 			var chunks = entries.MapToEvents(dtz).Distinct(new EventEqualityComparer()).Chunkmap().ToList();
