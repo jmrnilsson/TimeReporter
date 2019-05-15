@@ -67,14 +67,14 @@ namespace Timereporter.Core.Reducers
 
 					// This is to messy for a worksheet update. Use CRUD approach for stored cell values.!!
 
-					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = (a, TimeConfidence.Confident).Some()));
 					arrival.MatchNone(() => r.UserArrival.MatchSome(a => arrival = (a, TimeConfidence.Certain).Some()));
+					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = (a, TimeConfidence.Confident).Some()));
 
-					@break.MatchNone(() => r.EsentBreak.MatchSome(a => arrival = (a, TimeConfidence.Confident).Some()));
 					@break.MatchNone(() => r.UserBreak.MatchSome(a => arrival = (a, TimeConfidence.Certain).Some()));
+					@break.MatchNone(() => r.EsentBreak.MatchSome(a => arrival = (a, TimeConfidence.Confident).Some()));
 
-					departure.MatchNone(() => r.EsentDepature.MatchSome(a => departure = (a, TimeConfidence.Confident).Some()));
 					departure.MatchNone(() => r.UserArrival.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()));
+					departure.MatchNone(() => r.EsentDepature.MatchSome(a => departure = (a, TimeConfidence.Confident).Some()));
 
 					Option<long> total = Option.None<long>();
 
@@ -85,10 +85,10 @@ namespace Timereporter.Core.Reducers
 					{
 						Date = r.Date,
 						ArrivalHours = RoundHours(arrival),
-						ArrivalConfidence = arrival.ValueOr((0, TimeConfidence.None)).Item2,
+						ArrivalConfidence = arrival.Match(some => some.Item2, () => TimeConfidence.None),
 						BreakHours = RoundHours(@break),
 						DepartureHours = RoundHours(departure),
-						DepartureConfidence = departure.ValueOr((0, TimeConfidence.None)).Item2
+						DepartureConfidence = departure.Match(some => some.Item2, () => TimeConfidence.None)
 					};
 				}
 			}

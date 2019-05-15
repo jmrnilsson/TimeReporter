@@ -24,8 +24,6 @@ namespace Timereporter
 		private readonly DataGridView dgv;
 		private BindingList<WorkdayDetailsBindingListItem> workdayDetailsBindingList;
 		private BindingSource workdayBindingSource = new BindingSource();
-		private long lastDataBindMillisecond;
-
 
 		public GridMutator(DataGridView dgv)
 		{
@@ -34,7 +32,6 @@ namespace Timereporter
 			// https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/raise-change-notifications--bindingsource
 			// https://stackoverflow.com/questions/9758577/c-sharp-datagridview-not-updated-when-datasource-is-changed
 			this.dgv = dgv;
-			dgv.DataBindingComplete += Dgv_DataBindingComplete;
 
 			this.workdayDetailsBindingList = new BindingList<WorkdayDetailsBindingListItem>();
 
@@ -52,11 +49,6 @@ namespace Timereporter
 			this.dgv.Columns[3].HeaderText = "Break";
 			this.dgv.Columns[4].HeaderText = "Depature";
 			this.dgv.Columns[5].HeaderText = "Total (H)";
-		}
-
-		private void Dgv_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
-		{
-			lastDataBindMillisecond = SystemClock.Instance.GetCurrentInstant().ToUnixTimeMilliseconds();
 		}
 
 		public void Load(ComboBox comboBox1)
@@ -82,7 +74,6 @@ namespace Timereporter
 
 		public void Load(Option<LocalDate> yearMonthOption)
 		{
-
 			Color lightGray = Color.FromArgb(255, 240, 240, 240);
 			Color lightRed = Color.FromArgb(255, 255, 244, 244);
 
