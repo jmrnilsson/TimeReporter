@@ -27,6 +27,7 @@ namespace Timereporter.Core.Reducers
 					IWorkday wd = everyDay[i];
 					DateTime localDateTime = DateTime.ParseExact(wd.DateText, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 					LocalDate localDate = new LocalDate(localDateTime.Year, localDateTime.Month, localDateTime.Day);
+
 					if (workKvp.ContainsKey(wd.DateText) && !wd.IsWeekend())
 					{
 						yield return new WorkdayDetailsDto

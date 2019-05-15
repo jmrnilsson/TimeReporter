@@ -35,7 +35,7 @@ namespace Timereporter.Core.Reducers
 					Departure = departure.Some(),
 					Break = Option.None<long>(),
 					HashCode = $"{date}:{eg.Key.Kind}:{arrival}::{departure}".ToFnv1aHash()
-		};
+				};
 
 			return reduceDate;
 		}
