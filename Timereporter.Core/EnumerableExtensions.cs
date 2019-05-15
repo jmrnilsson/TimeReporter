@@ -1,5 +1,7 @@
 ﻿using NodaTime;
 using Optional;
+using Optional.Collections;
+using Optional.Unsafe;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -34,92 +36,7 @@ namespace Timereporter.Core
 			}
 			return list;
 		}
-
-		public static IEnumerable<WorkdayDto> ToWorkdays(this List<Event> events, DateTimeZone timeZone)
-		{
-			Option<long> ReduceTime(IGrouping<Date, Event> grouping, string kind, Func<IEnumerable<long>, long> accumulator)
-			{
-				Option<long> time = Option.None<long>();
-
-				grouping
-					.Where(g => g.Kind == kind)
-					.Select(g => g.Timestamp)
-					.SomeWhen(e => e.Any())
-					.MatchSome(some: g => time = accumulator(g).Some());
-
-				return time;
-			}
-
-			var reduceDate =
-				from e in events
-				group e by new Date(DoubleExtensions.ToLocalDateTimestampMilliseconds(e.Timestamp)) into eg
-				select new
-				{
-					Date = eg.Key,
-					EsentArrival = ReduceTime(eg, "ESENT_MIN", g => g.Min()),
-					EsentDepature = ReduceTime(eg, "ESENT_MAX", g => g.Max()),
-					OtherArrival = ReduceTime(eg, "OTHEREVENT_MIN", g => g.Min()),
-					OtherDepature = ReduceTime(eg, "OTHEREVENT_MAX", g => g.Max()),
-
-					// Because logged times do not use date as key b
-
-					//EsentA = eg.Where(e => e.Kind == "ESENT_MIN").ToList(),
-					//OtherA = eg.Where(e => e.Kind == "ESENT_MAX").ToList(),
-					//EsentD = eg.Where(e => e.Kind == "OTHEREVENT_MIN").ToList(),
-					//OtherD = eg.Where(e => e.Kind == "OTHEREVENT_MAX").ToList()
-
-					// Should really be partitioned by localDate of the clients timezone.
-				};
-
-			Option<float> RoundHours(Option<(long, TimeConfidence)> unixTimestamp)
-			{
-				var hours = Option.None<float>();
-				unixTimestamp.MatchSome(ts =>
-				{
-					var value = ts.Item1.ToInstantFromUnixTimestampMilliseconds().InZone(timeZone).LocalDateTime.TimeOfDay;
-					var roundedHours = (float)value.Hour + (float)value.Minute / (float)60 + (float)value.Second / (float)3600 + (float)value.Millisecond / (float)360000;
-					hours = roundedHours.Some();
-				});
-				return hours;
-			}
-
-			IEnumerable<WorkdayDto> RereduceTime()
-			{
-				foreach (var r in reduceDate)
-				{
-					Option<(long, TimeConfidence)> arrival = Option.None<(long, TimeConfidence)>();
-					Option<(long, TimeConfidence)> departure = Option.None<(long, TimeConfidence)>();
-
-					// This is to messy for a worksheet update. Use CRUD approach for stored cell values.!!
-
-					arrival.MatchNone(() => r.EsentArrival.MatchSome(a => arrival = (a, TimeConfidence.Confident).Some()));
-					arrival.MatchNone(() => r.OtherArrival.MatchSome(a => arrival = (a, TimeConfidence.Insecure).Some()));
-
-					departure.MatchNone(() => r.EsentDepature.MatchSome(a => departure = (a, TimeConfidence.Confident).Some()));
-					departure.MatchNone(() => r.OtherDepature.MatchSome(a => departure = (a, TimeConfidence.Certain).Some()));
-					
-					Option<long> total = Option.None<long>();
-
-					// No break for now. No use of Summarize either
-					arrival.MatchSome(a => departure.MatchSome(d => total = (d.Item1 - a.Item1).Some()));
-
-					yield return new WorkdayDto
-					{
-						Date = r.Date.DateText(),
-						ArrivalHours = RoundHours(arrival),
-						ArrivalConfidence = arrival.ValueOr((0, TimeConfidence.None)).Item2,
-						BreakHours = Option.None<float>(),
-						DepartureHours = RoundHours(departure),
-						DepartureConfidence = departure.ValueOr((0, TimeConfidence.None)).Item2
-					};
-				}
-			}
-
-			// System.Diagnostics.Debugger.Break();
-
-			return RereduceTime().ToList();
-		}
-
+		
 		public static IEnumerable<WorkdayDetailsDto> ToWorkdayDetails(this IEnumerable<WorkdayDto> workday)
 		{
 			foreach(var wd in workday)

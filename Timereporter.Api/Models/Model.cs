@@ -18,7 +18,7 @@ namespace Timereporter.Api.Models
 		{
 			modelBuilder.Entity<EventDo>()
 				.HasKey(c => new { c.Timestamp, c.Kind });
-
+			
 			modelBuilder.Entity<WorkdayDo>()
 					.HasKey(c => new { c.Date, c.Kind });
 

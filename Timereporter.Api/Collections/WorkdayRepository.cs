@@ -22,21 +22,55 @@ namespace Timereporter.Api.Collections
 			this.databaseContextFactory = databaseContextFactory;
 		}
 
-		public List<Event> Find(Instant fromDate, Instant exclusiveToDate)
+		//public List<Event> Find(Instant fromDate, Instant exclusiveToDate)
+		//{
+		//	using (DatabaseContext db = databaseContextFactory())
+		//	{
+		//		IQueryable<Event> events =
+		//			from e in db.Events
+		//			where e.Timestamp >= fromDate.ToUnixTimeMilliseconds()
+		//			where e.Timestamp < exclusiveToDate.ToUnixTimeMilliseconds()
+		//			select new Event(e.Kind, e.Timestamp);
+
+		//		return events.ToList();
+		//	}
+		//}
+
+		public List<IWorkdaySlice> Find(LocalDate fromDate, LocalDate exclusiveToDate)
 		{
 			using (DatabaseContext db = databaseContextFactory())
 			{
-				IQueryable<Event> events =
-					from e in db.Events
-					where e.Timestamp >= fromDate.ToUnixTimeMilliseconds()
-					where e.Timestamp < exclusiveToDate.ToUnixTimeMilliseconds()
-					select new Event(e.Kind, e.Timestamp);
+				var workdaySlices =
+				(
+					from e in db.Workdays
+					where e.Date >= new DateText(fromDate).ToInt32()
+					where e.Date < new DateText(exclusiveToDate).ToInt32()
+					select new
+					{
+						Date = new DateText(e.Date).ToString(),
+						e.Kind,
+						e.Arrival,
+						e.Break,
+						e.Departure,
+					}
+				).ToList();
 
-				return events.ToList();
+				IEnumerable<IWorkdaySlice> workdaySliceList =
+					from e in workdaySlices
+					select new WorkdaySlice
+					{
+						Date = e.Date,
+						Kind = e.Kind,
+						Arrival = e.Arrival.SomeNotNull().Match(some: s => s.Value.Some(), () => Option.None<long>()),
+						Break = e.Break.SomeNotNull().Match(some: s => s.Value.Some(), () => Option.None<long>()),
+						Departure = e.Departure.SomeNotNull().Match(some: s => s.Value.Some(), () => Option.None<long>()),
+					};
+
+				return workdaySliceList.ToList();
 			}
 		}
 
-		public Option<WorkdayDto> Find(string date)
+		public Option<WorkdayDto> Find(int date)
 		{
 			using (DatabaseContext db = databaseContextFactory())
 			{
@@ -70,7 +104,7 @@ namespace Timereporter.Api.Collections
 				var wd = new WorkdayDo()
 				{
 					Added = now,
-					Date = date,
+					Date = new DateText(date).ToInt32(),
 					Kind = kind,
 				};
 				db.Add(wd);
@@ -81,7 +115,7 @@ namespace Timereporter.Api.Collections
 			{
 				foreach (var slice in slices)
 				{
-					var option = db.Workdays.SingleOrNone(c => c.Date == slice.Date && c.Kind == slice.Kind);
+					var option = db.Workdays.SingleOrNone(c => c.Date == new DateText(slice.Date).ToInt32() && c.Kind == slice.Kind);
 					var unchanged = option.Match(o => o.HashCode == slice.HashCode, () => false);
 
 					if (unchanged)

@@ -7,8 +7,7 @@ namespace Timereporter.Api.Models
 	[Table("Workdays")]
 	public class WorkdayDo
 	{
-		[StringLength(10)]
-		public string Date { get; set; }
+		public int Date { get; set; }
 		[StringLength(25)]
 		public string Kind { get; set; }
 		[Required]

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Timereporter.Api.Models;
 
 namespace Timereporter.Api.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190515220534_DropWorkdayCompositeKey")]
+    partial class DropWorkdayCompositeKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,9 +55,8 @@ namespace Timereporter.Api.Migrations
 
             modelBuilder.Entity("Timereporter.Api.Models.WorkdayDo", b =>
                 {
-                    b.Property<int>("Date");
-
                     b.Property<string>("Kind")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(25);
 
                     b.Property<DateTime>("Added");
@@ -66,12 +67,14 @@ namespace Timereporter.Api.Migrations
 
                     b.Property<DateTime>("Changed");
 
+                    b.Property<int>("Date");
+
                     b.Property<long?>("Departure");
 
                     b.Property<string>("HashCode")
                         .IsRequired();
 
-                    b.HasKey("Date", "Kind");
+                    b.HasKey("Kind");
 
                     b.ToTable("Workdays");
                 });

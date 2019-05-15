@@ -23,16 +23,23 @@ namespace Timereporter.Api
 			this.eventLog = eventLog;
 			this.cursorRepository = cursorRepository;
 			this.dateTimeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-
 		}
 
 		public Workdays GetWorkdays(int year, int month, DateTimeZone dateTimeZone)
 		{
 			var fromLocalDate = dateTimeZone.AtStartOfDay(new LocalDate(year, month, 1));
 			var exclusiveToLocalDate = dateTimeZone.AtStartOfDay(new LocalDate(year, month, DateTime.DaysInMonth(year, month)).PlusDays(1));
-			List<Event> wd = workdayRepository.Find(fromLocalDate.ToInstant(), exclusiveToLocalDate.ToInstant());
+			List<IWorkdaySlice> wd = workdayRepository.Find(fromLocalDate.Date, exclusiveToLocalDate.Date);
 			return WorkdayReducer.ToWorkdayList(year, month, wd, dateTimeZone);
 		}
+
+		//public Workdays GetWorkdays(int year, int month, DateTimeZone dateTimeZone)
+		//{
+		//	var fromLocalDate = dateTimeZone.AtStartOfDay(new LocalDate(year, month, 1));
+		//	var exclusiveToLocalDate = dateTimeZone.AtStartOfDay(new LocalDate(year, month, DateTime.DaysInMonth(year, month)).PlusDays(1));
+		//	List<Event> wd = workdayRepository.Find(fromLocalDate.ToInstant(), exclusiveToLocalDate.ToInstant());
+		//	return WorkdayReducer.ToWorkdayList(year, month, wd, dateTimeZone);
+		//}
 
 		public void CalculateWorkdays()
 		{

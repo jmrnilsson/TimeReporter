@@ -67,8 +67,6 @@ namespace Timereporter.EventLogTask
 			Console.ReadKey();
 		}
 
-
-
 		private static void Tracker_OnProgressChanged()
 		{
 			Console.Write(".");

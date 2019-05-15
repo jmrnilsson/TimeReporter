@@ -12,12 +12,12 @@ namespace Timereporter.Core.Reducers
 	public static class WorkdayReducer
 	{
 
-		public static Workdays ToWorkdayList(int year, int month, List<Event> events, DateTimeZone tz)
+		public static Workdays ToWorkdayList(int year, int month, List<IWorkdaySlice> workdaySlices, DateTimeZone tz)
 		{
 			IEnumerable<WorkdayDetailsDto> Enumerate_()
 			{
 				var everyDay = EnumerableExtensions.WorkdayRange(year, month);
-				var workdayKvp_ = EnumerableExtensions.ToWorkdays(events, tz);
+				var workdayKvp_ = WorkdaySliceFlattenerReducer.ToWorkdays(workdaySlices, tz);
 				var workdayKvp = workdayKvp_.ToWorkdayDetails();
 				var workKvp = workdayKvp.ToDictionary(wd => wd.Date);
 				var weeks = EnumerableExtensions.GetEuropeanWeeks(year);
