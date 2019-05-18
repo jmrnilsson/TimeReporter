@@ -84,7 +84,7 @@ namespace Timereporter
 				return now.InZone(tz).Date;
 			});
 
-			var workdays = GetData(localDate.Year, localDate.Month).ToList();
+			var workdays = ApiClient.GetData(localDate.Year, localDate.Month).ToList();
 
 			// Collection already belongs to a DataGridView control. This operation is no longer valid.
 			for(int i = 0; i < workdayDetailsBindingList.Count; i++)
@@ -154,29 +154,6 @@ namespace Timereporter
 			else if (dgv.Rows[i].DefaultCellStyle.BackColor != Color.Empty)
 			{
 				dgv.Rows[i].DefaultCellStyle.BackColor = Color.Empty;
-			}
-		}
-
-		public IEnumerable<WorkdayDetailsDto> GetData(int year, int month)
-		{
-
-			using (var client = new HttpClient())
-			{
-				client.DefaultRequestHeaders.Clear();
-				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-				var dateTimeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-				var dtz = dateTimeZone.Id.Replace("/", "_");
-				var uri = $"http://localhost:53762/api/workday/{year}/{month}/{dtz}";
-				var response = client.GetAsync(uri).Result;
-
-				if (!response.IsSuccessStatusCode)
-				{
-					throw new ApplicationException("workday get rest");
-				}
-				var json = response.Content.ReadAsStringAsync().Result;
-				var wd = JsonConvert.DeserializeObject<Core.Models.Workdays>(json);
-				return wd.List;
 			}
 		}
 	}

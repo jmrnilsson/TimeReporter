@@ -10,5 +10,6 @@ namespace Timereporter.Core.Models
 		Option<long> Departure { get; }
 		Option<long> Break { get;  }
 		string HashCode { get; }
+		string CalculateHashCode();
 	}
 }

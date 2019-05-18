@@ -10,75 +10,54 @@ using Timereporter.Core.Models;
 
 namespace Timereporter.Core
 {
+
 	public static class ApiClient
 	{
 		public static void PostEvents(Dictionary<string, Time> times)
 		{
-			var chunks = times.Chunkmap().ToList();
+			List<Event> list = times.ToList().ToList();
 
-			using (var client = new HttpClient())
+			using (var client = new ApiHttpClient())
 			{
-				client.DefaultRequestHeaders.Clear();
-				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-				foreach (var chunk in chunks)
-				{
-					Post(client, chunk);
-				}
+				client.Post("http://localhost:53762/api/events", list);
 			}
 		}
 
 		public static void PostEvent(Event @event)
 		{
-			using (var client = new HttpClient())
+			using (var client = new ApiHttpClient())
 			{
-				client.DefaultRequestHeaders.Clear();
-				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-				Post(client, new List<Event>() { @event });
-			}
-		}
-
-		private static void Post(HttpClient client, List<Event> events)
-		{
-			// Previous url http://localhost:53762/api/events
-
-			var json = JsonConvert.SerializeObject(new Events { Events_ = events });
-			var content = new StringContent(json, Encoding.UTF8, "application/json");
-			content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-			var result = client.PostAsync("http://localhost:53762/api/events", content).Result;
-
-			if (!result.IsSuccessStatusCode)
-			{
-				throw new ApplicationException("esent rest");
+				client.Post("http://localhost:53762/api/events", new List<Event>() { @event });
 			}
 		}
 
 		public static bool Ping()
 		{
-			using (var client = new HttpClient())
+			using (var client = new ApiHttpClient())
 			{
-				client.DefaultRequestHeaders.Clear();
-				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-				var result = client.GetAsync("http://localhost:53762/api/ping").Result;
-				return result.IsSuccessStatusCode;
+				return (int)client.Get("http://localhost:53762/api/ping") > 299;
 			}
 		}
 
 		public static void PostEvents(List<IEventLogEntryProxy> entries, DateTimeZone dtz)
 		{
-			var chunks = entries.MapToEvents(dtz).Distinct(new EventEqualityComparer()).Chunkmap().ToList();
-
-			using (var client = new HttpClient())
+			List<Event> events = entries.MapToEvents(dtz).Distinct(new EventEqualityComparer()).ToList();
+			
+			using (var client = new ApiHttpClient())
 			{
-				client.DefaultRequestHeaders.Clear();
-				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+				client.Post("http://localhost:53762/api/events", events, list => new Events { Events_ = list });
+			}
+		}
 
-				foreach (var chunk in chunks)
-				{
-					Post(client, chunk);
-				}
+		public static IEnumerable<WorkdayDetailsDto> GetData(int year, int month)
+		{
+			using (var client = new ApiHttpClient())
+			{
+				var dateTimeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+				var dtz = dateTimeZone.Id.Replace("/", "_");
+				var uri = $"http://localhost:53762/api/workday/{year}/{month}/{dtz}";
+				var response = client.Get<Workdays>(uri);
+				return response.Item2.Map<IEnumerable<WorkdayDetailsDto>>(wd => wd.List).ValueOr(Enumerable.Empty<WorkdayDetailsDto>());
 			}
 		}
 	}

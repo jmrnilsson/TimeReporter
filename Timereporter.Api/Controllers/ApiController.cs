@@ -8,7 +8,9 @@ using Timereporter.Core.Models;
 
 namespace Timereporter.Api.Controllers
 {
-    [Route("api")]
+
+
+	[Route("api")]
     [ApiController]
     public class ApiController : ControllerBase
     {
@@ -43,6 +45,23 @@ namespace Timereporter.Api.Controllers
 		{
 			apiService.CalculateWorkdays();
 			return Ok();
+		}
+
+		/// <summary>
+		///  Example: curl -d "" -X PATCH http://localhost:53762/api/workday/calculate
+		/// </summary>
+		/// <returns></returns>
+		[HttpPatch("workday/departure/{day}/{property:regex(^(arrival|break|departure)$)}/{hourOfDay:decimal}/{hashCode}")]
+		public IActionResult Calculate(string day, string property, decimal hourOfDay, string hashCode)
+		{
+			DateText dateText = new DateText(day);
+
+			if (!Enum.TryParse(property, out WorkdaySliceProperty property_))
+			{
+				return BadRequest();
+			}
+
+			return StatusCode((int)apiService.TrySaveWorkdaySlice(dateText, property_, hourOfDay, hashCode)); 
 		}
 
 		/// <summary>

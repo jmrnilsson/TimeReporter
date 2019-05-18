@@ -9,12 +9,10 @@ namespace Timereporter.Core.Models
 		public Option<long> Arrival { get; set; }
 		public Option<long> Break { get; set; }
 		public Option<long> Departure { get; set; }
-		public string HashCode
+		public string HashCode { get; set; }
+		public string CalculateHashCode()
 		{
-			get
-			{
-				return $"{Date}:{Kind}:{Arrival}::{Departure}".ToFnv1aHash();
-			}
+			return $"{Date}:{Kind}:{Arrival}::{Departure}".ToFnv1aHash();
 		}
 	}
 }

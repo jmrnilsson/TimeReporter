@@ -7,6 +7,8 @@ using Timereporter.Core;
 using Timereporter.Core.Models;
 using Timereporter.Core.Reducers;
 using Optional;
+using Timereporter.Api.Controllers;
+using Optional.Unsafe;
 
 namespace Timereporter.Api
 {
@@ -64,6 +66,41 @@ namespace Timereporter.Api
 		public void SaveEvents(List<Event> events)
 		{
 			eventLog.AddRange(events);
+		}
+
+		public TransactionResult TrySaveWorkdaySlice(DateText dateText, WorkdaySliceProperty prop, decimal hourOfDay, string hashCode)
+		{
+			Option<long> hourOfDay_ =  ((long)(hourOfDay * 1000m * 60m * 60m)).Some();
+
+			var optionalWorkday = workdayRepository.Find(dateText.ToInt32());
+
+			WorkdaySlice slice = optionalWorkday.ValueOrFailure();
+
+			if (slice.HashCode != hashCode)
+			{
+				return TransactionResult.Conflict;
+			}
+
+			if (prop == WorkdaySliceProperty.Arrival)
+			{
+				slice.Arrival = hourOfDay_;
+			}
+			else if (prop == WorkdaySliceProperty.Break)
+			{
+				slice.Break = hourOfDay_;
+			}
+			else if (prop == WorkdaySliceProperty.Departure)
+			{
+				slice.Departure = hourOfDay_;
+			}
+
+			if (slice.HashCode == slice.CalculateHashCode())
+			{
+				return TransactionResult.NotModified;
+			}
+
+			workdayRepository.Save(slice);
+			return TransactionResult.Ok;
 		}
 	}
 }

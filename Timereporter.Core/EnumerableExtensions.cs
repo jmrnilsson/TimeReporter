@@ -54,18 +54,12 @@ namespace Timereporter.Core
 			}
 		}
 
-		public static IEnumerable<List<Event>> Chunkmap(this Dictionary<string, Time> times)
+		public static List<Event> ToList(this Dictionary<string, Time> times)
 		{
 			List<Event> events = new List<Event>();
 
 			foreach (var t in times)
 			{
-				if (events.Count > 998)
-				{
-					yield return events;
-					events.Clear();
-				}
-
 				// TODO: Replace with Some(Action<>) me thinks. Also use workday reporting instead of events. Also push events rather.
 				t.Value.Source.MatchSome(source =>
 				{
@@ -73,7 +67,7 @@ namespace Timereporter.Core
 					t.Value.Max.MatchSome(some: max => events.Add(new Event($"{source}_MAX", max)));
 				});
 			}
-			yield return events;
+			return events;
 		}
 
 		public static IEnumerable<List<Event>> Chunkmap(this IEnumerable<Event> entries)

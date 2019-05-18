@@ -4,15 +4,13 @@ using Optional.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Timereporter.Api.Models;
 using Timereporter.Core;
 using Timereporter.Core.Models;
-using Event = Timereporter.Core.Models.Event;
 
 namespace Timereporter.Api.Collections
 {
-
+	// Most of these things should probably be move to some richer object!
 	public class WorkdayRepository : IWorkdayRepository
 	{
 		private readonly DatabaseContextFactoryDelegate databaseContextFactory;
@@ -21,20 +19,6 @@ namespace Timereporter.Api.Collections
 		{
 			this.databaseContextFactory = databaseContextFactory;
 		}
-
-		//public List<Event> Find(Instant fromDate, Instant exclusiveToDate)
-		//{
-		//	using (DatabaseContext db = databaseContextFactory())
-		//	{
-		//		IQueryable<Event> events =
-		//			from e in db.Events
-		//			where e.Timestamp >= fromDate.ToUnixTimeMilliseconds()
-		//			where e.Timestamp < exclusiveToDate.ToUnixTimeMilliseconds()
-		//			select new Event(e.Kind, e.Timestamp);
-
-		//		return events.ToList();
-		//	}
-		//}
 
 		public List<IWorkdaySlice> Find(LocalDate fromDate, LocalDate exclusiveToDate)
 		{
@@ -70,7 +54,12 @@ namespace Timereporter.Api.Collections
 			}
 		}
 
-		public Option<WorkdayDto> Find(int date)
+		public Option<WorkdaySlice> Find(int date)
+		{
+			return Find_(date).Match(some: wd => wd.Some(), none: () => Option.None<WorkdaySlice>());
+		}
+
+		private Option<WorkdaySlice> Find_(int date)
 		{
 			using (DatabaseContext db = databaseContextFactory())
 			{
@@ -78,23 +67,42 @@ namespace Timereporter.Api.Collections
 				(
 					from wd in db.Workdays
 					where wd.Date == date
-					select wd
+					select new
+					{
+						Date = new DateText(wd.Date).ToString(),
+						wd.Departure,
+						wd.Arrival,
+						wd.Break,
+						wd.HashCode,
+
+					}
 				).ToList();
 
-				//var query0 =
-				//query.Select(wd => new WorkdayDto
-				//{
-				//	ArrivalHours = wd.ArrivalMilliseconds.SomeNotNull().Map(m => (float) m / 60000) ,
-				//	DepartureHours = wd.DepartureMilliseconds.SomeNotNull().Map(d => (float)d / 60000),
-				//	BreakHours = wd.BreakMilliseconds.SomeNotNull().Map(b => (float)b/ 60000),
-				//	Date = wd.Date,
-				//	Changed = wd.Changed.ToUnixDateTimeMilliseconds()
-				//});
-				return Option.None<WorkdayDto>();
+				var query0 = query.Select(wd => new WorkdaySlice
+				{
+					Arrival = wd.Arrival.SomeNotNull().Match(a => a.Value.Some(), () => Option.None<long>()),
+					Departure = wd.Departure.SomeNotNull().Match(a => a.Value.Some(), () => Option.None<long>()),
+					Break = wd.Break.SomeNotNull().Match(a => a.Value.Some(), () => Option.None<long>()),
+					Date = wd.Date,
+					HashCode = wd.HashCode
+				});
+
+				return Option.None<WorkdaySlice>();
 			}
 		}
 
+		public void Save(IWorkdaySlice slice)
+		{
+			Save_(new List<IWorkdaySlice>() { slice });
+		}
+
 		public void Save(List<IWorkdaySlice> slices)
+		{
+			Save_(slices);
+		}
+
+
+		private void Save_(List<IWorkdaySlice> slices)
 		{
 			var instant = SystemClock.Instance.GetCurrentInstant();
 			DateTime now = instant.ToDateTimeUtc();
@@ -115,15 +123,15 @@ namespace Timereporter.Api.Collections
 			{
 				foreach (var slice in slices)
 				{
-					var option = db.Workdays.SingleOrNone(c => c.Date == new DateText(slice.Date).ToInt32() && c.Kind == slice.Kind);
-					var unchanged = option.Match(o => o.HashCode == slice.HashCode, () => false);
+					var sliceOption = db.Workdays.SingleOrNone(c => c.Date == new DateText(slice.Date).ToInt32() && c.Kind == slice.Kind);
+					bool unchanged = sliceOption.Match(o => o.HashCode == slice.HashCode, () => false);
 
 					if (unchanged)
 					{
 						continue;
 					}
 
-					var model = option.ValueOr(() => Create(db, slice.Date, slice.Kind));
+					var model = sliceOption.ValueOr(() => Create(db, slice.Date, slice.Kind));
 					model.Changed = now;
 					model.Arrival = slice.Arrival.Match(a => a, () => (long?)null);
 					model.Break = slice.Break.Match(b => b, () => (long?)null);
