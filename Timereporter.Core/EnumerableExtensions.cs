@@ -54,22 +54,6 @@ namespace Timereporter.Core
 			}
 		}
 
-		public static List<Event> ToList(this Dictionary<string, Time> times)
-		{
-			List<Event> events = new List<Event>();
-
-			foreach (var t in times)
-			{
-				// TODO: Replace with Some(Action<>) me thinks. Also use workday reporting instead of events. Also push events rather.
-				t.Value.Source.MatchSome(source =>
-				{
-					t.Value.Min.MatchSome(some: min => events.Add(new Event($"{source}_MIN", min)));
-					t.Value.Max.MatchSome(some: max => events.Add(new Event($"{source}_MAX", max)));
-				});
-			}
-			return events;
-		}
-
 		public static IEnumerable<List<Event>> Chunkmap(this IEnumerable<Event> entries)
 		{
 			List<Event> events = new List<Event>();

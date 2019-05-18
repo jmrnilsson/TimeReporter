@@ -30,11 +30,12 @@ namespace Timereporter.EventLogTask
 			RegisterServices(container.Value);
 
 			Console.Write("Checking api availability..");
-			bool apiOnline = ApiClient.Ping();
+			var eventRepository = new EventRepository();
+			bool apiOnline = eventRepository.Ping();
 			Console.WriteLine("done!");
 
 			DateTimeZone dtz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-
+			
 			IWindowsEventLogReader windowsEventLogReader = container.Value.GetInstance<IWindowsEventLogReader>();
 			windowsEventLogReader.OnProgressChanged += Tracker_OnProgressChanged;
 			var dateTimeValueFactory = container.Value.GetInstance<IDateTimeValueFactory>();
@@ -52,10 +53,10 @@ namespace Timereporter.EventLogTask
 			if (apiOnline)
 			{
 				Console.Write("Synchronizing log entries..");
-				ApiClient.PostEvents(entries, dtz);
+				eventRepository.PostEvents(entries, dtz);
 				Console.WriteLine("done!");
 				Console.Write("Synchronizing similified arrivals and depatures..");
-				ApiClient.PostEvents(minMaxes);
+				eventRepository.PostEvents(minMaxes);
 				Console.WriteLine("done!");
 				Console.WriteLine("Press any key to close.");
 			}
@@ -76,7 +77,7 @@ namespace Timereporter.EventLogTask
 		{
 			container.Register<IWindowsEventLogReader, WindowsEventLogReader>();
 			container.Register<IEventLogProxy, EventLogProxy>(Lifestyle.Transient);
-			container.Register(EventLogFactory, Lifestyle.Transient); 
+			container.Register(EventLogFactory, Lifestyle.Transient);
 			container.Register<IDateTimeValueFactory, DateTimeValueFactory>(Lifestyle.Transient);
 		}
 

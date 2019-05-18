@@ -13,42 +13,6 @@ namespace Timereporter.Core
 
 	public static class ApiClient
 	{
-		public static void PostEvents(Dictionary<string, Time> times)
-		{
-			List<Event> list = times.ToList().ToList();
-
-			using (var client = new ApiHttpClient())
-			{
-				client.Post("http://localhost:53762/api/events", list);
-			}
-		}
-
-		public static void PostEvent(Event @event)
-		{
-			using (var client = new ApiHttpClient())
-			{
-				client.Post("http://localhost:53762/api/events", new List<Event>() { @event });
-			}
-		}
-
-		public static bool Ping()
-		{
-			using (var client = new ApiHttpClient())
-			{
-				return (int)client.Get("http://localhost:53762/api/ping") > 299;
-			}
-		}
-
-		public static void PostEvents(List<IEventLogEntryProxy> entries, DateTimeZone dtz)
-		{
-			List<Event> events = entries.MapToEvents(dtz).Distinct(new EventEqualityComparer()).ToList();
-			
-			using (var client = new ApiHttpClient())
-			{
-				client.Post("http://localhost:53762/api/events", events, list => new Events { Events_ = list });
-			}
-		}
-
 		public static IEnumerable<WorkdayDetailsDto> GetData(int year, int month)
 		{
 			using (var client = new ApiHttpClient())
