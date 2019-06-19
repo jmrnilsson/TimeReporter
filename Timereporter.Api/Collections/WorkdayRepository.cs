@@ -39,18 +39,20 @@ namespace Timereporter.Api.Collections
 					}
 				).ToList();
 
-				IEnumerable<IWorkdaySlice> workdaySliceList =
-					from e in workdaySlices
-					select new WorkdaySlice
-					{
-						Date = e.Date,
-						Kind = e.Kind,
-						Arrival = e.Arrival.SomeNotNull().Match(some: s => s.Value.Some(), () => Option.None<long>()),
-						Break = e.Break.SomeNotNull().Match(some: s => s.Value.Some(), () => Option.None<long>()),
-						Departure = e.Departure.SomeNotNull().Match(some: s => s.Value.Some(), () => Option.None<long>()),
-					};
+				//IEnumerable<IWorkdaySlice> workdaySliceList =
+				//	from e in workdaySlices
+				//	select new WorkdaySlice
+				//	{
+				//		Date = e.Date,
+				//		Kind = e.Kind,
+				//		Arrival = e.Arrival.SomeNotNull().Match(some: s => s.Value.Some(), () => Option.None<long>()),
+				//		Break = e.Break.SomeNotNull().Match(some: s => s.Value.Some(), () => Option.None<long>()),
+				//		Departure = e.Departure.SomeNotNull().Match(some: s => s.Value.Some(), () => Option.None<long>()),
+				//	};
 
-				return workdaySliceList.ToList();
+				// return workdaySliceList.ToList();
+
+				throw new NotImplementedException("Skip work for now");
 			}
 		}
 

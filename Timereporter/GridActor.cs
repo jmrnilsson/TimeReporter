@@ -46,13 +46,13 @@ namespace Timereporter
 			void PostNew(string value_, string eventName, LocalDate localDate, DateTimeZone tdz)
 			{
 				long instant = value_.FromHourDecimalExpressionToUnixTimestampMilliseconds(localDate, tdz);
-				ApiClient.PostEvent(new Event(eventName, instant));
+				// ApiClient.PostEvent(new Event(eventName, instant));
 			}
 
 			void PostIgnore(string eventName, LocalDate localDate, DateTimeZone tdz)
 			{
 				long instant = "0.1".FromHourDecimalExpressionToUnixTimestampMilliseconds(localDate, tdz);
-				ApiClient.PostEvent(new Event($"{eventName}_REMOVE", instant));
+				// ApiClient.PostEvent(new Event($"{eventName}_REMOVE", instant));
 			}
 
 			GetEventName().MatchSome(delegate (string eventName)
